@@ -1,163 +1,84 @@
-import React from "react";
-import {
-  Anchor,
-  Box,
-  Container,
-  Grid,
-  GridCol,
-  Group,
-  Stack,
-  Text,
-  UnstyledButton,
-} from "@mantine/core";
-
-// Icons & Logos
-import { FacebookIcon, InstagramIcon, LinkedInIcon, XIcon } from "./icons";
-import { AtlasLogo, CsiroLogo, GbifLogo, NcrisLogo } from "./logos";
-
-// Styles
+import { Flex, Group } from "@mantine/core";
 import classes from "./Footer.module.css";
 
-export function Footer({fullWidth = false}: {fullWidth?: boolean}): React.ReactElement {
-  const containerProps = fullWidth ? { fluid: true } : { size: 'lg' };
-
+export function Footer({
+  fullWidth = true,
+}: {
+  fullWidth?: boolean;
+}): React.ReactElement {
   return (
-    <Box className={classes.footer}>
-      <Container {...containerProps} className={classes.container}>
-        <Grid gutter={28}>
-          <GridCol span={{ base: 12, xs: 12, sm: 4 }}>
-            <Stack gap={20}>
-              <AtlasLogo
-                style={{
-                  maxWidth: "100%",
-                  backgroundSize: "100% 100%",
-                }}
-              />
-              <Text size="sm" pr={4}>
-                The{" "}
-                <Anchor href="https://www.ala.org.au/about-ala/" size="sm">
-                  ALA
-                </Anchor>{" "}
-                is made possible by contributions from its partners, is
-                supported by{" "}
-                <Anchor
-                  href="https://www.education.gov.au/national-collaborative-research-infrastructure-strategy-ncris"
-                  size="sm"
-                >
-                  NCRIS
-                </Anchor>
-                , is hosted by{" "}
-                <Anchor href="https://csiro.au/" size="sm">
-                  CSIRO
-                </Anchor>
-                , and is the Australian node of{" "}
-                <Anchor href="https://www.gbif.org/en/" size="sm">
-                  GBIF
-                </Anchor>
-                .
-              </Text>
-              <Group gap={20}>
-                <NcrisLogo />
-                <CsiroLogo />
-                <GbifLogo />
-              </Group>
-            </Stack>
-          </GridCol>
-          <GridCol span={{ base: 12, xs: 12, sm: 4 }}>
-            <Stack gap={15} h="100%">
-              <Anchor href="https://www.ala.org.au/blog/" fw="bold">
-                News & updates
-              </Anchor>
-              <Anchor href="https://support.ala.org.au/support/home" fw="bold">
-                Help & resources
-              </Anchor>
-              <Group gap={30}>
-                <UnstyledButton
-                  component="a"
-                  href="https://facebook.com/atlasoflivingaustralia/"
-                  target="_blank"
-                  aria-label="Facebook"
-                >
-                  <FacebookIcon />
-                </UnstyledButton>
-                <UnstyledButton
-                  component="a"
-                  href="https://x.com/atlaslivingaust"
-                  target="_blank"
-                  aria-label="Twitter"
-                >
-                  <XIcon />
-                </UnstyledButton>
-                <UnstyledButton
-                  component="a"
-                  href="https://au.linkedin.com/company/atlas-of-living-australia"
-                  target="_blank"
-                  aria-label="Linkedin"
-                >
-                  <LinkedInIcon />
-                </UnstyledButton>
-                <UnstyledButton
-                  component="a"
-                  href="https://www.instagram.com/atlasoflivingaustralia/"
-                  target="_blank"
-                  aria-label="Instagram"
-                >
-                  <InstagramIcon />
-                </UnstyledButton>
-              </Group>
-              <Group
-                style={{ marginTop: "auto" }}
-                className={`${classes.links} ${classes.desktop}`}
-                gap="xs"
+    <footer className={classes.footer}>
+      <Flex justify="space-between">
+        <div className={classes.logo}>
+          <img
+            className={classes.vlaanderenLogo}
+            src="https://assets.vlaanderen.be/image/upload/c_scale,q_auto:eco,w_1000/Vlaanderen_is_wetenschap_vol_xnbdq2"
+            srcSet="https://assets.vlaanderen.be/image/upload/c_scale,q_auto:eco,w_320/Vlaanderen_is_wetenschap_vol_xnbdq2 320w, https://assets.vlaanderen.be/image/upload/c_scale,q_auto:eco,w_480/Vlaanderen_is_wetenschap_vol_xnbdq2 480w, https://assets.vlaanderen.be/image/upload/c_scale,q_auto:eco,w_960/Vlaanderen_is_wetenschap_vol_xnbdq2 960w, https://assets.vlaanderen.be/image/upload/c_scale,q_auto:eco,w_1420/Vlaanderen_is_wetenschap_vol_xnbdq2 1420w, https://assets.vlaanderen.be/image/upload/c_scale,q_auto:eco,w_1920/Vlaanderen_is_wetenschap_vol_xnbdq2 1920w"
+            sizes="(max-width:500px) 50vw, 25vw"
+          />
+        </div>
+        <div className={classes.center}>
+          <div className={classes.title}>
+            <h1>
+              Het Vlaams Biodiversiteitsportaal is een officiële website van de
+              Vlaamse overheid
+            </h1>
+            <div className={classes.subTitle}>
+              <span>uitgegeven door</span>
+
+              <a
+                href="https://www.vlaanderen.be/inbo"
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                <Anchor href="https://www.ala.org.au/terms-of-use#cy" size="sm">
-                  Copyright
-                </Anchor>
-                <Anchor href="https://www.ala.org.au/terms-of-use" size="sm">
-                  Terms of use
-                </Anchor>
-                <Anchor size="sm">Accessibility</Anchor>
-                <Anchor href="https://status.ala.org.au/" size="sm">
-                  System status
-                </Anchor>
-              </Group>
-            </Stack>
-          </GridCol>
-          <GridCol span={{ base: 12, xs: 12, sm: 4 }}>
-            <Stack gap={15}>
-              <Text fw="bold">Contact us</Text>
-              <Text>
-                <Anchor href="mailto:support@ala.org.au">
-                  support@ala.org.au
-                </Anchor>{" "}
-                for technical support and general enquiries
-              </Text>
-              <Text>
-                <Anchor href="communications@ala.org.au">
-                  communications@ala.org.au
-                </Anchor>{" "}
-                for media and engagement enquiries
-              </Text>
-              <Group
-                style={{ marginTop: "auto" }}
-                className={`${classes.links} ${classes.mobile}`}
-                gap="xs"
-              >
-                <Anchor href="https://www.ala.org.au/terms-of-use#cy" size="sm">
-                  Copyright
-                </Anchor>
-                <Anchor href="https://www.ala.org.au/terms-of-use" size="sm">
-                  Terms of use
-                </Anchor>
-                <Anchor size="sm">Accessibility</Anchor>
-                <Anchor href="https://status.ala.org.au/" size="sm">
-                  System status
-                </Anchor>
-              </Group>
-            </Stack>
-          </GridCol>
-        </Grid>
-      </Container>
-    </Box>
+                Instituut voor Natuur- en Bosonderzoek
+              </a>
+            </div>
+          </div>
+          <Group className={classes.links}>
+            <a
+              href="https://www.vlaanderen.be/inbo/privacyverklaring/"
+              rel="noopener noreferrer"
+            >
+              Privacyverklaring
+            </a>
+            <a
+              href="https://www.vlaanderen.be/inbo/cookiebeleid/"
+              rel="noopener noreferrer"
+            >
+              Cookieverklaring
+            </a>
+            <a
+              href="https://www.vlaanderen.be/inbo/toegankelijkheidsverklaring/"
+              rel="noopener noreferrer"
+            >
+              Toegankelijkheidsverklaring
+            </a>
+            <a href="/pages/terms-of-use.html" rel="noopener noreferrer">
+              Gebruiksvoorwaarden
+            </a>
+          </Group>
+        </div>
+        <Group className={classes.language}>
+          <a
+            href="https://www.vlaanderen.be/inbo"
+            hrefLang="nl"
+            lang="nl"
+            target="_blank"
+            rel="alternate"
+          >
+            nl
+          </a>
+          <a
+            href="https://www.vlaanderen.be/inbo/en-gb/homepage/"
+            hrefLang="en"
+            lang="en"
+            rel="alternate"
+          >
+            en
+          </a>
+        </Group>
+      </Flex>
+    </footer>
   );
 }

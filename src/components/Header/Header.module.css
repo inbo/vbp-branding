@@ -1,0 +1,64 @@
+:root {
+  --vbp-header-height: 4rem;
+  --vbp-header-border-size: 1px;
+}
+
+.header {
+  height: var(--vbp-header-height);
+
+  display: flex;
+  justify-content: space-between;
+
+  border-bottom: var(--vbp-header-border-size) solid
+    var(--mantine-primary-color-filled);
+}
+
+.logo {
+  margin: var(--mantine-spacing-xs);
+  height: calc(var(--vbp-header-height) - (2 * var(--mantine-spacing-xs)));
+}
+
+.navItems {
+  margin-right: auto;
+}
+
+.menuLink {
+  height: calc(var(--vbp-header-height) - var(--vbp-header-border-size));
+  padding: var(--mantine-spacing-xs);
+
+  display: flex;
+  align-items: center;
+
+  color: var(--mantine-color-text);
+  font-size: var(--mantine-font-size-lg);
+  font-weight: 500;
+  text-transform: uppercase;
+  text-decoration: underline 0.15em rgba(0, 0, 0, 0);
+
+  transition: text-decoration-color 300ms;
+
+  &:hover {
+    background-color: var(--mantine-color-default-hover);
+    text-decoration-color: var(--mantine-primary-color-filled);
+  }
+}
+
+.iconLink {
+  aspect-ratio: 0.8;
+  display: flex;
+  justify-content: center;
+}
+
+.caret {
+  margin-left: 0.2em;
+}
+
+.dropDown {
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+}
+
+.LanguageDropDown {
+  left: unset !important;
+  right: 0;
+}

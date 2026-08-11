@@ -1,71 +1,43 @@
 .footer {
-  /* Mobile Sizes */
-  @media (max-width: 48em) {
-    padding-top: 30px;
-    padding-bottom: 30px;
-  }
+  width: 100%;
+  position: relative;
 
-  /* Desktop Sizes */
-  @media (min-width: 48em) {
-    padding-top: 60px;
-    padding-bottom: 60px;
-  }
+  padding: 1em;
 
-  @mixin light {
-    background-color: white;
+  a {
+    color: black;
   }
-  @mixin dark {
-    background-color: black;
-  }
-}
-
-.container {
-  padding-left: 20px;
-  padding-right: 20px;
 }
 
 .logo {
-  /* Mobile Sizes */
-  @media (max-width: 48em) {
-    width: 186px;
-    height: 27.014px;
-    background-size: 186px 27.014px;
-  }
+  height: 100px;
+}
 
-  /* Desktop Sizes */
-  @media (min-width: 48em) {
-    width: 324px;
-    height: 47.6px;
-    background-size: 324px 47.6px;
+.vlaanderenLogo {
+  height: 100px;
+}
+
+.center {
+  margin: 0 1em;
+}
+
+.title {
+  margin-bottom: 1em;
+
+  h1 {
+    font-size: 1.2rem;
+    margin: 0;
+  }
+}
+
+.subTitle {
+  span {
+    margin-right: 0.1em;
   }
 }
 
 .links {
-  & a:not(:last-of-type) {
-    /* Mobile Sizes */
-    @media (max-width: 48em) {
-      margin-right: 20px;
-    }
-
-    /* Desktop Sizes */
-    @media (min-width: 48em) {
-      margin-right: 40px;
-    }
-  }
 }
 
-.mobile {
-  padding-top: 15px;
-
-  /* Desktop Sizes */
-  @media (min-width: 48em) {
-    display: none !important;
-  }
-}
-
-.desktop {
-  /* Mobile Sizes */
-  @media (max-width: 48em) {
-    display: none !important;
-  }
+.language {
 }

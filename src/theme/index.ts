@@ -4,13 +4,15 @@ import { createTheme } from "@mantine/core";
 import components from "./components";
 import colors from "./colours";
 
+import "./fonts.css";
+
 export const theme = createTheme({
   // Colour configutation
   colors,
   // variantColorResolver,
-  primaryColor: "rust",
+  primaryColor: "vbp-primary",
   // Component customisation
   components,
   // Typography
-  fontFamily: "Roboto",
+  fontFamily: "flanders-sans",
 });

@@ -1,9 +1,0 @@
-.content {
-  @mixin light {
-    background-color: white;
-  }
-
-  @mixin dark {
-    background-color: black;
-  }
-}
