@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import logo from "../../static/logo.png";
-import logoHover from "../../static/logo-hover.png";
+import React from "react";
 import { Group } from "@mantine/core";
+
+import { VbpLogo } from "../logos/VbpLogo";
 
 import classes from "./Header.module.css";
 import { LanguageDropDown } from "./LanguageDropDown";
@@ -33,20 +33,9 @@ export function Header({
   compact = false,
   isLegacySkin = false,
 }: HeaderProps): React.ReactElement {
-  const [hovered, setHovered] = useState(false);
-  useEffect(() => {
-    new Image().src = logoHover;
-  }, []);
   return (
     <header className={classes.header}>
-      <a className={classes.logoLink} href="/">
-        <img
-          className={classes.logo}
-          src={hovered ? logoHover : logo}
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
-        />
-      </a>
+      <VbpLogo homeUrl="/" hoverVariant="blue" />
       <Group className={classes.navItems} gap={0}>
         <a
           className={classes.menuLink}

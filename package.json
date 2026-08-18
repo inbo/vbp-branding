@@ -11,6 +11,8 @@
       "default": "./dist/index.mjs"
     },
     "./styles": "./dist/index.css",
+    "./favicon.svg": "./dist/favicon.svg",
+    "./favicon.ico": "./dist/favicon.ico",
     "./dist/index.css": "./dist/index.css",
     "./package.json": "./package.json"
   },
@@ -18,7 +20,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && cp src/static/favicon.svg src/static/favicon.ico dist/",
     "dev": "vite build --watch"
   },
   "peerDependencies": {

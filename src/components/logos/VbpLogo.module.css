@@ -1,0 +1,17 @@
+.logo {
+  display: inline-block;
+  margin: var(--mantine-spacing-xs);
+  height: calc(var(--vbp-header-height, 4rem) - (2 * var(--mantine-spacing-xs)));
+}
+
+.logo svg {
+  display: block;
+  height: 100%;
+  width: auto;
+}
+
+.logoLink {
+  display: inline-block;
+  text-decoration: none;
+  cursor: pointer;
+}

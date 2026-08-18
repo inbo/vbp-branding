@@ -1,9 +1,9 @@
 .image {
   @mixin light {
-    background-image: url("/home/stefan/Projects/Inbo/vlaams-biodiversiteitsportaal/branding/public/images/logo.png");
+    background-image: url("../../static/ala-light.svg");
   }
   @mixin dark {
-    background-image: url("/home/stefan/Projects/Inbo/vlaams-biodiversiteitsportaal/branding/public/images/logo-hover.png");
+    background-image: url("../../static/ala-dark.svg");
   }
 
   /* Mobile Sizes */
@@ -35,8 +35,28 @@
 }
 
 .image.logoLegacy {
-  background-image: url("/home/stefan/Projects/Inbo/vlaams-biodiversiteitsportaal/branding/public/images/logo.png");
+  background-image: url("../../static/ala-dark.svg");
+  /* legacy */
+  
+  /* Mobile Sizes */
+  @media (max-width: 65em) {
+    width: 235px;
+    height: 35px;
+    background-size: 235px 35px;
+  }
 
-  height: 2em;
-  width: 2em;
+  /* Tablet/Medium Sizes */
+  @media (min-width: 48em) and (max-width: 65em) {
+    width: 280px;
+    height: 41px;
+    background-size: 280px 41px;
+  }
+
+  /* Desktop Sizes */
+  @media (min-width: 65em) {
+    margin-left: 5px;
+    width: 345px;
+    height: 50px;
+    background-size: 345px 50px;
+  }
 }
