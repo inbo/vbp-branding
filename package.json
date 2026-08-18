@@ -57,6 +57,7 @@
     "registry": "https://npm.pkg.github.com"
   },
   "dependencies": {
+    "@mantine/form": "^9.5.1",
     "react-cookie": "^8.1.2",
     "react-intl": "10.1.20"
   }

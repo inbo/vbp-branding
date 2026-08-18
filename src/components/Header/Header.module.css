@@ -35,7 +35,9 @@
   text-transform: uppercase;
   text-decoration: underline 0.15em rgba(0, 0, 0, 0);
 
-  transition: text-decoration-color 300ms;
+  transition:
+    color 300ms,
+    text-decoration-color 300ms;
 
   &:hover {
     background-color: var(--mantine-color-default-hover);
@@ -56,9 +58,52 @@
 .dropDown {
   border-top-left-radius: 0 !important;
   border-top-right-radius: 0 !important;
+
+  padding: 0;
+}
+
+.menuDropDownItem {
+  border-radius: 0;
+}
+
+.menuDropDownLink {
+  color: var(--mantine-color-text);
+  text-decoration: none;
+}
+
+.menuDropDownIcon {
+  margin-right: 0.5em;
 }
 
 .LanguageDropDown {
   left: unset !important;
   right: 0;
+}
+
+.LanguageDropDownTarget {
+  color: var(--mantine-primary-color-filled);
+
+  &:hover {
+    color: var(--mantine-primary-color-filled-hover);
+  }
+}
+
+.searchInputWrapper {
+  max-width: 200px;
+
+  transition: max-width 300ms;
+  overflow: hidden;
+}
+
+.searchInputButton {
+  background-color: var(--mantine-color-background);
+  border: 0;
+}
+
+.searchInputButtonActive {
+  color: var(--mantine-primary-color-filled-hover);
+}
+
+.hidden {
+  max-width: 0px !important;
 }

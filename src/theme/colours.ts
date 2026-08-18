@@ -387,7 +387,7 @@ export const variantColorResolver: VariantColorsResolver = (input) => {
     };
   }
 
-  return defaultResolvedColours;
+  return { ...defaultResolvedColours, hoverColor: colours["vbp-secondary"][6] };
 };
 
 export default colours;

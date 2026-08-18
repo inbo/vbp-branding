@@ -1,37 +1,12 @@
-import {
-  Accordion,
-  Box,
-  Button,
-  Center,
-  Container,
-  Drawer,
-  Flex,
-  Group,
-  Menu,
-  Stack,
-  Tabs,
-  TabsList,
-  TabsTab,
-  Text,
-  UnstyledButton,
-  useMantineColorScheme,
-} from "@mantine/core";
+import { Center, Menu } from "@mantine/core";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faCaretDown,
-  faChevronDown,
-  faLocationCrosshairs,
-  faMap,
-  faQuestionCircle,
-  faSignsPost,
-  faUserXmark,
-} from "@fortawesome/free-solid-svg-icons";
-interface LanguageDropDownProps {}
-
+import { faCaretDown } from "@fortawesome/free-solid-svg-icons";
+import { useVBPLocale, SUPPORTED_LOCALE } from "../I18n/VBPIntlProvider";
 import classes from "./Header.module.css";
 
-export function LanguageDropDown({}: LanguageDropDownProps) {
+export function LanguageDropDown() {
+  const [locale, setLocale] = useVBPLocale();
   return (
     <Menu
       trigger="hover"
@@ -43,18 +18,19 @@ export function LanguageDropDown({}: LanguageDropDownProps) {
       <Menu.Target>
         <a
           href="#"
-          className={classes.menuLink}
+          className={`${classes.menuLink} ${classes.LanguageDropDownTarget}`}
           onClick={(event) => event.preventDefault()}
         >
-          <Center>
-            <span>NL</span>
-            <FontAwesomeIcon className={classes.caret} icon={faCaretDown} />
-          </Center>
+          {locale}
         </a>
       </Menu.Target>
       <Menu.Dropdown className={[classes.dropDown, classes.LanguageDropDown]}>
-        <Menu.Item>Nederlands</Menu.Item>
-        <Menu.Item>English</Menu.Item>
+        <Menu.Item onClick={() => setLocale(SUPPORTED_LOCALE.NL)}>
+          Nederlands
+        </Menu.Item>
+        <Menu.Item onClick={() => setLocale(SUPPORTED_LOCALE.EN)}>
+          English
+        </Menu.Item>
       </Menu.Dropdown>
     </Menu>
   );

@@ -1,0 +1,21 @@
+{
+  "header.login.help-overview": "Overzicht",
+  "header.login.help-access": "Toegang tot het portaal",
+  "header.login.help-wiki": "Wiki",
+  "header.login.help-challenges": "Challenges",
+  "header.login.help-intro-videos": "Introductiefilmpjes",
+  "header.login.help-survey": "Survey",
+  "header.login.help-workshop": "Workshop aanvragen",
+  "header.login.help-report-problems": "Problemen melden",
+  "header.login.help-terms-of-use": "Gebruiksvoorwaarden",
+  "header.login.my-profile": "Mijn profiel",
+  "header.login.my-lists": "Mijn lijsten",
+  "header.login.my-annotation": "Mijn annotaties",
+  "header.login.my-alerts": "Mijn meldingen",
+  "header.login.my-analysis": "Mijn analyse",
+  "header.login.logout": "Afmelden",
+  "header.login.login": "Aanmelden",
+  "header.login.spatial-hub": "Geografisch portaal",
+  "header.login.regions": "Regio's",
+  "header.login.explore-your-area": "Verken je omgeving"
+}

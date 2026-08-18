@@ -14,3 +14,6 @@ export * from "./components/logos";
 
 export { theme } from "./theme";
 export { mainShades } from "./theme/colours";
+
+export { VBPIntlProviderWrapper, useVBPLocale } from "./components/I18n/VBPIntlProvider";
+export { defaultMessages } from "./components/I18n";

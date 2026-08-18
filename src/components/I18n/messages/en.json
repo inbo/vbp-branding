@@ -1,0 +1,21 @@
+{
+  "header.login.help-overview": "Overview",
+  "header.login.help-access": "Portal access",
+  "header.login.help-wiki": "Wiki",
+  "header.login.help-challenges": "Challenges",
+  "header.login.help-intro-videos": "Intro videos",
+  "header.login.help-survey": "Survey",
+  "header.login.help-workshop": "Request a workshop",
+  "header.login.help-report-problems": "Report problems",
+  "header.login.help-terms-of-use": "Terms of use",
+  "header.login.my-profile": "My profile",
+  "header.login.my-lists": "My lists",
+  "header.login.my-annotation": "My annotations",
+  "header.login.my-alerts": "My alerts",
+  "header.login.my-analysis": "My analysis",
+  "header.login.logout": "Log out",
+  "header.login.login": "Log in",
+  "header.login.spatial-hub": "Spatial portal",
+  "header.login.regions": "Regions",
+  "header.login.explore-your-area": "Explore your area"
+}

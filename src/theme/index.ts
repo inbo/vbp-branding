@@ -2,7 +2,7 @@ import { createTheme } from "@mantine/core";
 
 // Theme override imports
 import components from "./components";
-import colors from "./colours";
+import colors, { variantColorResolver } from "./colours";
 
 import "./fonts.css";
 
@@ -11,6 +11,7 @@ export const theme = createTheme({
   colors,
   // variantColorResolver,
   primaryColor: "vbp-primary",
+  variantColorResolver,
   // Component customisation
   components,
   // Typography
