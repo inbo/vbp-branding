@@ -24,7 +24,7 @@ export function LanguageDropDown() {
           {locale}
         </a>
       </Menu.Target>
-      <Menu.Dropdown className={[classes.dropDown, classes.LanguageDropDown]}>
+      <Menu.Dropdown className={`${classes.dropDown} ${classes.LanguageDropDown}`}>
         <Menu.Item onClick={() => setLocale(SUPPORTED_LOCALE.NL)}>
           Nederlands
         </Menu.Item>

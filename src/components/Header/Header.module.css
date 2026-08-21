@@ -34,13 +34,131 @@
 .title {
   margin-right: var(--mantine-spacing-xs);
 
-  @media (max-width: $mantine-breakpoint-lg) {
+  @media (max-width: 75em) {
     display: none;
   }
 }
 
 .navItems {
   margin-right: auto;
+}
+
+/* burger replaces nav + icons on small screens */
+/* ponytail: !important because .menuLink on the same element sets display: flex */
+.burger {
+  display: none !important;
+}
+
+@media (max-width: 48em) {
+  /* ponytail: !important beats Mantine's own .mantine-Group-root display */
+  .navItems,
+  .headerIcons {
+    display: none !important;
+  }
+
+  .burger {
+    display: flex !important;
+    align-items: center;
+    margin-left: auto;
+  }
+}
+
+.burgerDropDown {
+  box-sizing: border-box;
+  border: 0 !important;
+  border-bottom: 1px solid var(--mantine-color-gray-3) !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  padding-block: 0 !important;
+  margin-block: 0 !important;
+  /* ponytail: left+right instead of 100vw, which includes the scrollbar */
+  left: 0 !important;
+  right: 0 !important;
+  width: auto !important;
+  max-width: none !important;
+}
+
+.burgerNav .menuLink {
+  justify-content: center;
+}
+
+ /* ponytail: blanket border reset beats Mantine's item/control borders */
+.geoAccordion,
+.geoAccordion * {
+  border: 0 !important;
+}
+
+.geoAccordion [data-accordion-control] {
+  padding: 0;
+  position: relative;
+  background: transparent;
+  font-weight: 500;
+  text-decoration: underline 0.15em rgba(0, 0, 0, 0);
+
+  transition:
+    background-color 300ms,
+    text-decoration-color 300ms;
+
+  &:hover {
+    background-color: var(--mantine-color-default-hover);
+    text-decoration-color: var(--mantine-primary-color-filled);
+  }
+}
+
+/* label centered in the full row, chevron floats at the end */
+.geoAccordion :global(.mantine-Accordion-label) {
+  padding: 0;
+  text-align: center;
+  font-weight: 500;
+  font-size: var(--mantine-font-size-lg);
+}
+
+ /* out of flow so the label stays centered in the full row */
+.geoAccordion :global(.mantine-Accordion-chevron) {
+  position: absolute;
+  right: var(--mantine-spacing-xs);
+  margin: 0;
+}
+
+.geoAccordion :global(.mantine-Accordion-content) {
+  padding: 0;
+}
+
+.burgerDropDown .menuDropDownItem {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.burgerDropDown .menuDropDownLink {
+  height: calc(var(--vbp-header-height) - var(--vbp-header-border-size));
+  padding: var(--mantine-spacing-xs);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: var(--mantine-font-size-lg);
+  transition: background-color 300ms;
+
+  &:hover {
+    background-color: var(--mantine-color-default-hover);
+  }
+}
+
+.burgerPanel {
+  border-top: 1px solid var(--mantine-color-gray-3);
+}
+
+.burgerIcons {
+  border-top: 1px solid var(--mantine-color-gray-3);
+  position: relative;
+
+  /* Group grow gives four equal cells; centre the icon inside each */
+  & > * {
+    justify-content: center;
+  }
+  overflow: hidden;
 }
 
 .menuLink {
@@ -123,6 +241,54 @@
 
 .searchInputButtonActive {
   color: var(--mantine-color-vbp-secondary-6);
+}
+
+/* burger row: the form is a plain block, the Group inside fills it, so the
+   icon owns its whole quarter; the form takes over the row once active */
+.searchExpandRight {
+  width: 100%;
+  justify-content: center;
+}
+
+.searchExpandRight .searchInputWrapper {
+  order: 1;
+  flex: 1;
+  max-width: 100%;
+}
+
+ /* icon button fills its quarter (hover area), shrinks back when expanded */
+.searchExpandRight .searchInputButton {
+  flex: 1;
+}
+
+.searchActive .searchInputButton {
+  flex: 0 0 auto;
+}
+
+.searchActive {
+  position: absolute;
+  inset: 0;
+  /* Group grow caps children at 25% via --group-child-width */
+  max-width: none !important;
+  z-index: 1;
+  background-color: var(--mantine-color-body);
+}
+
+.searchActive .searchExpandRight {
+  height: 100%;
+  width: 100%;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+}
+
+.searchActive .searchInputWrapper {
+  flex: 1;
+  width: auto;
+  max-width: none;
+}
+
+.searchActive .searchInputWrapper input {
+  width: 100%;
 }
 
 .hidden {

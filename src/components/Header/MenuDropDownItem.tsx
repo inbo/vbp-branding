@@ -12,6 +12,8 @@ interface MenuDropDownItemProps {
   onClick?: MouseEventHandler<HTMLElement>;
   icon: IconDefinition;
   className?: string;
+  /** render as a plain row (outside a Menu context, e.g. inside an Accordion) */
+  plain?: boolean;
 }
 export function MenuDropDownItem({
   id,
@@ -19,8 +21,22 @@ export function MenuDropDownItem({
   onClick,
   icon,
   className = "",
+  plain = false,
 }: MenuDropDownItemProps) {
   const intl = useIntl();
+  const link = (
+    <a href={url} onClick={onClick} className={classes.menuDropDownLink}>
+      <FontAwesomeIcon className={classes.menuDropDownIcon} icon={icon} />
+      {intl.formatMessage({ id: `header.login.${id}` })}
+    </a>
+  );
+  if (plain) {
+    return (
+      <div id={id} className={`${className} ${classes.menuDropDownItem}`}>
+        {link}
+      </div>
+    );
+  }
   // ponytail: <a> without href when it's an action; keeps one code path
   return (
     <Menu.Item
@@ -28,13 +44,7 @@ export function MenuDropDownItem({
       id={id}
       className={`${className} ${classes.menuDropDownItem}`}
     >
-      <a href={url} onClick={onClick} className={classes.menuDropDownLink}>
-        <FontAwesomeIcon
-          className={classes.menuDropDownIcon}
-          icon={icon}
-        ></FontAwesomeIcon>
-        {intl.formatMessage({ id: `header.login.${id}` })}
-      </a>
+      {link}
     </Menu.Item>
   );
 }

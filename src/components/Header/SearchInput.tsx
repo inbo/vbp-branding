@@ -8,7 +8,7 @@ import { useRef, useState } from "react";
 
 const AUTOCOMPLETE_URL = "/bie-index/search/auto";
 
-export function SearchInput() {
+export function SearchInput({ expandRight }: { expandRight?: boolean }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isActive, setIsActive] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -34,17 +34,38 @@ export function SearchInput() {
   }, 200);
 
   return (
-    <form action="/bie-hub/" method="GET">
+    <form
+      action="/bie-hub/"
+      method="GET"
+      className={expandRight && isActive ? classes.searchActive : undefined}
+      onBlur={(event) => {
+        // ponytail: close only when focus actually leaves the form
+        if (!event.currentTarget.contains(event.relatedTarget)) {
+          setIsActive(false);
+        }
+      }}
+    >
       <Group
         gap={"xs"}
-        onMouseEnter={() => {
-          setIsActive(true);
-          inputRef.current?.focus();
-        }}
-        onMouseLeave={() => {
-          setIsActive(false);
-          inputRef.current?.blur();
-        }}
+        className={expandRight ? classes.searchExpandRight : undefined}
+        onMouseEnter={
+          // ponytail: no hover-open in the burger row, the form moves under
+          // the cursor when it opens and hover would flicker
+          expandRight
+            ? undefined
+            : () => {
+                setIsActive(true);
+                inputRef.current?.focus();
+              }
+        }
+        onMouseLeave={
+          expandRight
+            ? undefined
+            : () => {
+                setIsActive(false);
+                inputRef.current?.blur();
+              }
+        }
       >
         <Autocomplete
           ref={inputRef}
@@ -59,6 +80,15 @@ export function SearchInput() {
         <button
           type="submit"
           className={`${classes.menuLink} ${classes.iconLink} ${classes.searchInputButton} ${isActive && classes.searchInputButtonActive}`}
+          onClick={(event) => {
+            // ponytail: empty input = open/focus instead of submitting.
+            // Covers touch (no hover) and blocks empty searches on desktop.
+            if (!inputRef.current?.value) {
+              event.preventDefault();
+              setIsActive(true);
+              inputRef.current?.focus();
+            }
+          }}
         >
           <FontAwesomeIcon icon={faMagnifyingGlass} />
         </button>

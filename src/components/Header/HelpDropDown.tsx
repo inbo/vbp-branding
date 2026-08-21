@@ -9,20 +9,65 @@ import {
   faClapperboard,
   faFileContract,
   faQuestionCircle,
-  faRightFromBracket,
-  faRightToBracket,
   faSquarePollVertical,
   faTrowelBricks,
-  faUser,
   faUserLock,
 } from "@fortawesome/free-solid-svg-icons";
 import classes from "./Header.module.css";
 import { MenuDropDownItem } from "./MenuDropDownItem";
 
-interface HelpDropDownProps {}
+export const HELP_ITEMS = [
+    {
+      id: "help-overview",
+      url: "/pages/handleiding.html",
+      icon: faCircleInfo,
+    },
+    {
+      id: "help-access",
+      url: "/pages/toegang.html",
+      icon: faUserLock,
+    },
+    {
+      id: "help-wiki",
+      url: "https://github.com/inbo/vlaams-biodiversiteitsportaal/wiki",
+      icon: faBook,
+    },
+    null,
+    {
+      id: "help-challenges",
+      url: "/pages/VBP_challenges.html",
+      icon: faBullseye,
+    },
+    {
+      id: "help-intro-videos",
+      url: "/pages/VBP_introductiefilmpjes.html",
+      icon: faClapperboard,
+    },
+    {
+      id: "help-survey",
+      url: "/pages/survey.html",
+      icon: faSquarePollVertical,
+    },
+    {
+      id: "help-workshop",
+      url: "/pages/VBP_workshop.html",
+      icon: faTrowelBricks,
+    },
+    null,
+    {
+      id: "help-report-problems",
+      url: "/pages/VBP_testen.html",
+      icon: faBug,
+    },
+    {
+      id: "help-terms-of-use",
+      url: "/pages/terms-of-use.html",
+      icon: faFileContract,
+    },
+  ];
 
-export function HelpDropDown({}: HelpDropDownProps) {
-  return [{}].map((item) => (
+export function HelpDropDown() {
+  return (
     <Menu
       trigger="hover"
       transitionProps={{ exitDuration: 0 }}
@@ -33,7 +78,7 @@ export function HelpDropDown({}: HelpDropDownProps) {
       <Menu.Target>
         <a
           href="#"
-          className={`${classes.menuLink} ${classes.HelpDropDownTarget}`}
+          className={`${classes.menuLink} ${classes.iconLink}`}
           onClick={(event) => event.preventDefault()}
         >
           <FontAwesomeIcon icon={faQuestionCircle} />
@@ -42,55 +87,7 @@ export function HelpDropDown({}: HelpDropDownProps) {
       <Menu.Dropdown
         className={`${classes.dropDown} ${classes.LanguageDropDown}`}
       >
-        {[
-          {
-            id: "help-overview",
-            url: "/pages/handleiding.html",
-            icon: faCircleInfo,
-          },
-          {
-            id: "help-access",
-            url: "/pages/toegang.html",
-            icon: faUserLock,
-          },
-          {
-            id: "help-wiki",
-            url: "https://github.com/inbo/vlaams-biodiversiteitsportaal/wiki",
-            icon: faBook,
-          },
-          null,
-          {
-            id: "help-challenges",
-            url: "/pages/VBP_challenges.html",
-            icon: faBullseye,
-          },
-          {
-            id: "help-intro-videos",
-            url: "/pages/VBP_introductiefilmpjes.html",
-            icon: faClapperboard,
-          },
-          {
-            id: "help-survey",
-            url: "/pages/survey.html",
-            icon: faSquarePollVertical,
-          },
-          {
-            id: "help-workshop",
-            url: "/pages/VBP_workshop.html",
-            icon: faTrowelBricks,
-          },
-          null,
-          {
-            id: "help-report-problems",
-            url: "/pages/VBP_testen.html",
-            icon: faBug,
-          },
-          {
-            id: "help-terms-of-use",
-            url: "/pages/terms-of-use.html",
-            icon: faFileContract,
-          },
-        ].map((item, i) =>
+        {HELP_ITEMS.map((item, i) =>
           item ? (
             <MenuDropDownItem key={item.id} {...item} />
           ) : (
@@ -99,5 +96,5 @@ export function HelpDropDown({}: HelpDropDownProps) {
         )}
       </Menu.Dropdown>
     </Menu>
-  ));
+  );
 }

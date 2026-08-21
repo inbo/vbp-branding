@@ -1,31 +1,48 @@
-import { Divider, Menu } from "@mantine/core";
+import { Accordion, Divider, Menu } from "@mantine/core";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faBook,
-  faBug,
-  faBullseye,
   faCaretDown,
-  faCircleInfo,
-  faClapperboard,
-  faFileContract,
   faLocationCrosshairs,
   faMap,
-  faQuestionCircle,
-  faRightFromBracket,
-  faRightToBracket,
   faSignsPost,
-  faSquarePollVertical,
-  faTrowelBricks,
-  faUser,
-  faUserLock,
 } from "@fortawesome/free-solid-svg-icons";
 import classes from "./Header.module.css";
 import { MenuDropDownItem } from "./MenuDropDownItem";
 
-interface GeographicDownProps {}
+const ITEMS = [
+  { id: "spatial-hub", url: "/spatial-hub/", icon: faMap },
+  { id: "regions", url: "/regions/", icon: faSignsPost },
+  {
+    id: "explore-your-area",
+    url: "/biocache-hub/explore",
+    icon: faLocationCrosshairs,
+  },
+];
 
-export function GeographicDropDown({}: GeographicDownProps) {
+interface GeographicDownProps {
+  /** render as an accordion row instead of a hover dropdown (burger menu) */
+  accordion?: boolean;
+}
+
+export function GeographicDropDown({ accordion }: GeographicDownProps) {
+  if (accordion) {
+    return (
+      <Accordion chevronPosition="right" className={classes.geoAccordion}>
+        <Accordion.Item value="geographic">
+          <Accordion.Control className={classes.menuLink}>
+            Geografisch
+          </Accordion.Control>
+          <Accordion.Panel>
+            {ITEMS.map((item) => (
+              <MenuDropDownItem key={item.id} plain {...item} />
+            ))}
+          </Accordion.Panel>
+        </Accordion.Item>
+      </Accordion>
+    );
+  }
+
   return (
     <Menu
       trigger="hover"
@@ -44,30 +61,10 @@ export function GeographicDropDown({}: GeographicDownProps) {
           <FontAwesomeIcon className={classes.caret} icon={faCaretDown} />
         </a>
       </Menu.Target>
-      <Menu.Dropdown className={`${classes.dropDown}`}>
-        {[
-          {
-            id: "spatial-hub",
-            url: "/spatial-hub/",
-            icon: faMap,
-          },
-          {
-            id: "regions",
-            url: "/regions/",
-            icon: faSignsPost,
-          },
-          {
-            id: "explore-your-area",
-            url: "/biocache-hub/explore",
-            icon: faLocationCrosshairs,
-          },
-        ].map((item, i) =>
-          item ? (
-            <MenuDropDownItem key={item.id} {...item} />
-          ) : (
-            <Divider key={`divider-${i}`} />
-          ),
-        )}
+      <Menu.Dropdown className={classes.dropDown}>
+        {ITEMS.map((item) => (
+          <MenuDropDownItem key={item.id} {...item} />
+        ))}
       </Menu.Dropdown>
     </Menu>
   );
