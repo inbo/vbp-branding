@@ -3,6 +3,8 @@
   position: relative;
 
   padding: 1em;
+  border-top: 1px solid var(--mantine-primary-color-filled);
+  margin-top: 1em;
 
   a {
     color: black;

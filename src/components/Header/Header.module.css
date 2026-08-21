@@ -18,6 +18,27 @@
   height: calc(var(--vbp-header-height) - (2 * var(--mantine-spacing-xs)));
 }
 
+.logoLink {
+  color: var(--mantine-primary-color-filled);
+  display: flex;
+  align-items: center;
+  transition: color 200ms;
+  text-decoration: none;
+  font-size: var(--mantine-font-size-xs);
+
+  &:hover {
+    color: var(--mantine-color-vbp-secondary-6);
+  }
+}
+
+.title {
+  margin-right: var(--mantine-spacing-xs);
+
+  @media (max-width: $mantine-breakpoint-lg) {
+    display: none;
+  }
+}
+
 .navItems {
   margin-right: auto;
 }
@@ -84,7 +105,7 @@
   color: var(--mantine-primary-color-filled);
 
   &:hover {
-    color: var(--mantine-primary-color-filled-hover);
+    color: var(--mantine-color-vbp-secondary-6);
   }
 }
 
@@ -101,9 +122,13 @@
 }
 
 .searchInputButtonActive {
-  color: var(--mantine-primary-color-filled-hover);
+  color: var(--mantine-color-vbp-secondary-6);
 }
 
 .hidden {
   max-width: 0px !important;
+}
+
+.loggedOut {
+  color: var(--mantine-color-gray-5);
 }

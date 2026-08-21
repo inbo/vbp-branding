@@ -34,7 +34,7 @@ export function LoginDropDown({
       <Menu.Target>
         <a
           href="#"
-          className={`${classes.menuLink} ${classes.LanguageDropDownTarget}`}
+          className={`${classes.menuLink} ${classes.LanguageDropDownTarget} ${isAuthenticated ? classes.loggedIn : classes.loggedOut}`}
           onClick={(event) => event.preventDefault()}
         >
           {isAuthenticated ? (

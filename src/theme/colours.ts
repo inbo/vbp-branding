@@ -377,17 +377,23 @@ const colours: Record<string, MantineColorsTuple> = {
 export const variantColorResolver: VariantColorsResolver = (input) => {
   const defaultResolvedColours = defaultVariantColorsResolver(input);
 
+  // ponytail: one hover pair for every variant, "ala" included
+  const hover = {
+    hover: colours["vbp-secondary"][6],
+    hoverColor: colours["vbp-secondary"][0],
+  };
+
   // Add new variants support
   if (input.variant === "ala") {
     return {
       background: "var(--mantine-color-red-9)",
-      hover: "var(--mantine-color-red-8)",
       color: "var(--mantine-color-white)",
       border: "none",
+      ...hover,
     };
   }
 
-  return { ...defaultResolvedColours, hoverColor: colours["vbp-secondary"][6] };
+  return { ...defaultResolvedColours, ...hover };
 };
 
 export default colours;

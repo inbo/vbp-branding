@@ -35,7 +35,10 @@ export function Header({
 }: HeaderProps): React.ReactElement {
   return (
     <header className={classes.header}>
-      <VbpLogo homeUrl="/" hoverVariant="blue" />
+      <a href={homeUrl} className={`${classes.logoLink} vbp-logo-hoverzone`}>
+        <VbpLogo hoverVariant="blue" />
+        <h1 className={classes.title}>Vlaams Biodiversiteitsportaal</h1>
+      </a>
       <Group className={classes.navItems} gap={0}>
         <a
           className={classes.menuLink}
@@ -54,7 +57,10 @@ export function Header({
       <Group gap={0}>
         <SearchInput />
         <HelpDropDown />
-        <LoginDropDown isAuthenticated onAuthClick />
+        <LoginDropDown
+          isAuthenticated={isAuthenticated || false}
+          onAuthClick={onAuthClick}
+        />
         <LanguageDropDown className={classes.menuLink} />
       </Group>
     </header>

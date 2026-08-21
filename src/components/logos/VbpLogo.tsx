@@ -28,17 +28,19 @@ type VbpLogoProps = React.DetailedHTMLProps<
   variant?: VbpLogoVariant;
   /** Colourway to switch to while hovered (pure CSS, no JS state) */
   hoverVariant?: VbpLogoVariant;
-  homeUrl?: string;
 };
 
 export function VbpLogo({
   variant = "plum",
   hoverVariant,
-  homeUrl,
   className,
   ...props
 }: VbpLogoProps): React.ReactElement {
-  const svgClass = ["vbp-logo", variant, hoverVariant && `hover-${hoverVariant}`]
+  const svgClass = [
+    "vbp-logo",
+    variant,
+    hoverVariant && `hover-${hoverVariant}`,
+  ]
     .filter(Boolean)
     .join(" ");
   const image = (
@@ -55,14 +57,6 @@ export function VbpLogo({
       {...props}
     />
   );
-
-  if (homeUrl) {
-    return (
-      <a href={homeUrl} className={classes.logoLink}>
-        {image}
-      </a>
-    );
-  }
 
   return image;
 }

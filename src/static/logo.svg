@@ -13,19 +13,19 @@
 .vbp-logo g { transition: fill 200ms, stroke 200ms; }
 
 /* Colourways from vbp-logo.ai. Apply on the root svg element, e.g. class="vbp-logo cyan".
-   Add class="hover-cyan" to swap to that colourway while hovered. */
-.vbp-logo.plum, .vbp-logo.hover-plum:hover       { --logo-base:#873a62; --logo-body:#c04684; --logo-detail:#ffffff; }
-.vbp-logo.mauve, .vbp-logo.hover-mauve:hover      { --logo-base:#873a62; --logo-body:#a17a94; --logo-detail:#ffffff; }
-.vbp-logo.lime, .vbp-logo.hover-lime:hover       { --logo-base:#c04684; --logo-body:#c2c442; --logo-detail:#ffffff; }
-.vbp-logo.slate-pink, .vbp-logo.hover-slate-pink:hover { --logo-base:#577483; --logo-body:#c04684; --logo-detail:#e0e9ed; }
-.vbp-logo.cyan, .vbp-logo.hover-cyan:hover       { --logo-base:#834838; --logo-body:#0fbbd6; --logo-detail:#fee800; }
-.vbp-logo.slate-cyan, .vbp-logo.hover-slate-cyan:hover { --logo-base:#587583; --logo-body:#0fbbd6; --logo-detail:#fee800; }
-.vbp-logo.olive, .vbp-logo.hover-olive:hover      { --logo-base:#834838; --logo-body:#68933e; --logo-detail:#ffec95; }
-.vbp-logo.orange, .vbp-logo.hover-orange:hover     { --logo-base:#ec7d31; --logo-body:#82a53c; --logo-detail:#fee000; }
-.vbp-logo.blue, .vbp-logo.hover-blue:hover       { --logo-base:#ec7d31; --logo-body:#5b7dbf; --logo-detail:#fedc00; }
-.vbp-logo.taupe, .vbp-logo.hover-taupe:hover      { --logo-base:#ee8b46; --logo-body:#937964; --logo-detail:#fedc00; }
-.vbp-logo.moss, .vbp-logo.hover-moss:hover       { --logo-base:#9fbd3b; --logo-body:#937964; --logo-detail:#fedc00; }
-.vbp-logo.mint, .vbp-logo.hover-mint:hover       { --logo-base:#e48d24; --logo-body:#55bf99; --logo-detail:#fee000; }
+   Add class="hover-cyan" to swap to that colourway while the logo or an enclosing .vbp-logo-hoverzone is hovered. */
+.vbp-logo.plum, .vbp-logo-hoverzone:hover .vbp-logo.hover-plum, .vbp-logo.hover-plum:hover       { --logo-base:#873a62; --logo-body:#c04684; --logo-detail:#ffffff; }
+.vbp-logo.mauve, .vbp-logo-hoverzone:hover .vbp-logo.hover-mauve, .vbp-logo.hover-mauve:hover      { --logo-base:#873a62; --logo-body:#a17a94; --logo-detail:#ffffff; }
+.vbp-logo.lime, .vbp-logo-hoverzone:hover .vbp-logo.hover-lime, .vbp-logo.hover-lime:hover       { --logo-base:#c04684; --logo-body:#c2c442; --logo-detail:#ffffff; }
+.vbp-logo.slate-pink, .vbp-logo-hoverzone:hover .vbp-logo.hover-slate-pink, .vbp-logo.hover-slate-pink:hover { --logo-base:#577483; --logo-body:#c04684; --logo-detail:#e0e9ed; }
+.vbp-logo.cyan, .vbp-logo-hoverzone:hover .vbp-logo.hover-cyan, .vbp-logo.hover-cyan:hover       { --logo-base:#834838; --logo-body:#0fbbd6; --logo-detail:#fee800; }
+.vbp-logo.slate-cyan, .vbp-logo-hoverzone:hover .vbp-logo.hover-slate-cyan, .vbp-logo.hover-slate-cyan:hover { --logo-base:#587583; --logo-body:#0fbbd6; --logo-detail:#fee800; }
+.vbp-logo.olive, .vbp-logo-hoverzone:hover .vbp-logo.hover-olive, .vbp-logo.hover-olive:hover      { --logo-base:#834838; --logo-body:#68933e; --logo-detail:#ffec95; }
+.vbp-logo.orange, .vbp-logo-hoverzone:hover .vbp-logo.hover-orange, .vbp-logo.hover-orange:hover     { --logo-base:#ec7d31; --logo-body:#82a53c; --logo-detail:#fee000; }
+.vbp-logo.blue, .vbp-logo-hoverzone:hover .vbp-logo.hover-blue, .vbp-logo.hover-blue:hover       { --logo-base:#ec7d31; --logo-body:#5b7dbf; --logo-detail:#fedc00; }
+.vbp-logo.taupe, .vbp-logo-hoverzone:hover .vbp-logo.hover-taupe, .vbp-logo.hover-taupe:hover      { --logo-base:#ee8b46; --logo-body:#937964; --logo-detail:#fedc00; }
+.vbp-logo.moss, .vbp-logo-hoverzone:hover .vbp-logo.hover-moss, .vbp-logo.hover-moss:hover       { --logo-base:#9fbd3b; --logo-body:#937964; --logo-detail:#fedc00; }
+.vbp-logo.mint, .vbp-logo-hoverzone:hover .vbp-logo.hover-mint, .vbp-logo.hover-mint:hover       { --logo-base:#e48d24; --logo-body:#55bf99; --logo-detail:#fee000; }
 </style>
 <g>
 <g class="logo-base" fill="#873a62">

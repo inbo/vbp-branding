@@ -17,7 +17,7 @@ export function AtlasLogo({ homeUrl, isLegacySkin = false, ...props }: AtlasLogo
 
   if (homeUrl) {
     return (
-      <a href={homeUrl} className={classes.logoLink}>
+      <a href={homeUrl} className={`${classes.logoLink} vbp-logo-hoverzone`}>
         {content}
       </a>
     );
