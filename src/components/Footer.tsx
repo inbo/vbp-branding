@@ -8,7 +8,7 @@ export function Footer({
 }): React.ReactElement {
   return (
     <footer className={classes.footer}>
-      <Flex justify="space-between">
+      <Flex justify="space-between" direction={{ base: "column", sm: "row" }}>
         <div className={classes.logo}>
           <img
             className={classes.vlaanderenLogo}

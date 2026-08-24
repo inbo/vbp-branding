@@ -35,6 +35,10 @@ export default defineConfig({
         "react/jsx-runtime", // Add this
         "react-cookie",
         "react-intl",
+        // Must NOT be bundled: a second copy means a second React context,
+        // so the app's useAuth() would not see our AuthProvider.
+        "react-oidc-context",
+        "oidc-client-ts",
         "@mantine/core",
         "@mantine/hooks",
         "@mantine/form",

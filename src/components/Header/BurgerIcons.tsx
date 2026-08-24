@@ -11,26 +11,23 @@ import classes from "./Header.module.css";
 import { SearchInput } from "./SearchInput";
 import { MenuDropDownItem } from "./MenuDropDownItem";
 import { HELP_ITEMS } from "./HelpDropDown";
-import { loginItems } from "./LoginDropdown";
+import { useLoginItems } from "./LoginDropdown";
 import { useVBPLocale, SUPPORTED_LOCALE } from "../I18n/VBPIntlProvider";
 
-interface BurgerIconsProps {
-  isAuthenticated: boolean;
-  onAuthClick?: React.MouseEventHandler<HTMLButtonElement>;
-}
-
 /** Icon row of the burger menu: tapping an icon expands its panel below. */
-export function BurgerIcons({ isAuthenticated, onAuthClick }: BurgerIconsProps) {
+export function BurgerIcons() {
   const [open, setOpen] = useState<string | null>(null);
   const [locale, setLocale] = useVBPLocale();
+  const { isAuthenticated, items: loginMenuItems } = useLoginItems();
+
+  const rows = (items: typeof loginMenuItems | typeof HELP_ITEMS) =>
+    items.flatMap((item) =>
+      item ? [<MenuDropDownItem key={item.id} plain {...item} />] : [],
+    );
 
   const panels: Record<string, React.ReactNode> = {
-    help: HELP_ITEMS.filter(Boolean).map((item) => (
-      <MenuDropDownItem key={item!.id} plain {...item!} />
-    )),
-    login: loginItems(isAuthenticated, onAuthClick)
-      .filter(Boolean)
-      .map((item) => <MenuDropDownItem key={item!.id} plain {...item!} />),
+    help: rows(HELP_ITEMS),
+    login: rows(loginMenuItems),
     language: [
       { value: SUPPORTED_LOCALE.NL, label: "Nederlands" },
       { value: SUPPORTED_LOCALE.EN, label: "English" },
@@ -49,12 +46,7 @@ export function BurgerIcons({ isAuthenticated, onAuthClick }: BurgerIconsProps) 
 
   return (
     <>
-      <Group
-        className={classes.burgerIcons}
-        gap={0}
-        grow
-        wrap="nowrap"
-      >
+      <Group className={classes.burgerIcons} gap={0} grow wrap="nowrap">
         <SearchInput expandRight />
         <a
           className={`${classes.menuLink} ${classes.iconLink}`}
@@ -75,12 +67,10 @@ export function BurgerIcons({ isAuthenticated, onAuthClick }: BurgerIconsProps) 
           {locale}
         </a>
       </Group>
-      {Object.keys(panels).map((id) => (
-        <Collapse key={id} in={open === id}>
-          {/* ponytail: border on an inner div so it's clipped when collapsed */}
-          <div className={classes.burgerPanel}>{panels[id]}</div>
-        </Collapse>
-      ))}
+      <Collapse in={open !== null}>
+        {/* ponytail: border on an inner div so it's clipped when collapsed */}
+        <div className={classes.burgerPanel}>{open && panels[open]}</div>
+      </Collapse>
     </>
   );
 }

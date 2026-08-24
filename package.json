@@ -14,14 +14,16 @@
     "./favicon.svg": "./dist/favicon.svg",
     "./favicon.ico": "./dist/favicon.ico",
     "./dist/index.css": "./dist/index.css",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./service-worker.js": "./dist/service-worker.js"
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "vite build && cp src/static/favicon.svg src/static/favicon.ico dist/",
-    "dev": "vite build --watch"
+    "build": "vite build && npm run build:sw && cp src/static/favicon.svg src/static/favicon.ico dist/",
+    "dev": "vite build --watch",
+    "build:sw": "esbuild src/components/auth/service-worker.ts --bundle --minify --format=iife --target=es2020 --outfile=dist/service-worker.js"
   },
   "peerDependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
@@ -30,8 +32,10 @@
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@mantine/core": "^7.17.8",
     "@mantine/hooks": "^7.17.8",
+    "oidc-client-ts": "^3.5.0",
     "react": "^18.x || ^19.x",
-    "react-dom": "^18.x || ^19.x"
+    "react-dom": "^18.x || ^19.x",
+    "react-oidc-context": "^3.3.1"
   },
   "devDependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.1.0",
@@ -43,8 +47,10 @@
     "@types/node": "^25.0.3",
     "@types/react": "^18.0.0",
     "@vitejs/plugin-react": "^5.1.2",
+    "oidc-client-ts": "^3.5.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
+    "react-oidc-context": "^3.3.1",
     "sass-embedded": "^1.100.0",
     "typescript": "^5.9.3",
     "vite": "^7.3.0",

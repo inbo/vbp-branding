@@ -33,6 +33,21 @@ export function SearchInput({ expandRight }: { expandRight?: boolean }) {
     }
   }, 200);
 
+  // ponytail: no hover-open in the burger row, the form moves under the
+  // cursor when it opens and hover would flicker
+  const hover = expandRight
+    ? {}
+    : {
+        onMouseEnter: () => {
+          setIsActive(true);
+          inputRef.current?.focus();
+        },
+        onMouseLeave: () => {
+          setIsActive(false);
+          inputRef.current?.blur();
+        },
+      };
+
   return (
     <form
       action="/bie-hub/"
@@ -48,24 +63,7 @@ export function SearchInput({ expandRight }: { expandRight?: boolean }) {
       <Group
         gap={"xs"}
         className={expandRight ? classes.searchExpandRight : undefined}
-        onMouseEnter={
-          // ponytail: no hover-open in the burger row, the form moves under
-          // the cursor when it opens and hover would flicker
-          expandRight
-            ? undefined
-            : () => {
-                setIsActive(true);
-                inputRef.current?.focus();
-              }
-        }
-        onMouseLeave={
-          expandRight
-            ? undefined
-            : () => {
-                setIsActive(false);
-                inputRef.current?.blur();
-              }
-        }
+        {...hover}
       >
         <Autocomplete
           ref={inputRef}

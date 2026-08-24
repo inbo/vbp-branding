@@ -88,8 +88,12 @@
   border: 0 !important;
 }
 
-.geoAccordion [data-accordion-control] {
+.geoAccordion [data-accordion-control],
+.geoAccordion :global(.mantine-Accordion-content) {
   padding: 0;
+}
+
+.geoAccordion [data-accordion-control] {
   position: relative;
   background: transparent;
   font-weight: 500;
@@ -118,10 +122,6 @@
   position: absolute;
   right: var(--mantine-spacing-xs);
   margin: 0;
-}
-
-.geoAccordion :global(.mantine-Accordion-content) {
-  padding: 0;
 }
 
 .burgerDropDown .menuDropDownItem {
@@ -256,13 +256,9 @@
   max-width: 100%;
 }
 
- /* icon button fills its quarter (hover area), shrinks back when expanded */
-.searchExpandRight .searchInputButton {
+ /* icon button fills its quarter (hover area) until the input expands */
+form:not(.searchActive) .searchExpandRight .searchInputButton {
   flex: 1;
-}
-
-.searchActive .searchInputButton {
-  flex: 0 0 auto;
 }
 
 .searchActive {

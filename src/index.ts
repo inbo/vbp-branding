@@ -17,3 +17,10 @@ export { mainShades } from "./theme/colours";
 
 export { VBPIntlProviderWrapper, useVBPLocale } from "./components/I18n/VBPIntlProvider";
 export { defaultMessages } from "./components/I18n";
+
+export {
+  VBPAuthProviderWrapper,
+  useVBPAuth,
+  AUTH_COOKIE_NAME,
+  type VBPAuth,
+} from "./components/auth/VBPAuthProvider";

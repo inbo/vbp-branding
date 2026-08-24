@@ -16,25 +16,16 @@ import { SearchInput } from "./SearchInput";
 import { BurgerIcons } from "./BurgerIcons";
 
 interface HeaderProps {
-  onAuthClick?: React.MouseEventHandler<HTMLButtonElement>;
   onSearchClick?: React.MouseEventHandler<HTMLButtonElement>;
-  isAuthenticated?: boolean;
-  fullWidth?: boolean;
-  compact?: boolean;
   homeUrl?: string;
   myProfileUrl?: string;
-  isLegacySkin?: boolean;
 }
 
+/** Reads auth state from the context, so render it inside `VBPAuthProviderWrapper`. */
 export function Header({
-  onAuthClick,
   onSearchClick,
-  isAuthenticated,
   homeUrl = "https://www.ala.org.au/",
   myProfileUrl = "https://auth.ala.org.au/userdetails/myprofile",
-  fullWidth = false,
-  compact = false,
-  isLegacySkin = false,
 }: HeaderProps): React.ReactElement {
   const navLinks = (accordionGeo?: boolean) => (
     <>
@@ -54,18 +45,6 @@ export function Header({
     </>
   );
 
-  const icons = (
-    <>
-      <SearchInput />
-      <HelpDropDown />
-      <LoginDropDown
-        isAuthenticated={isAuthenticated || false}
-        onAuthClick={onAuthClick}
-      />
-      <LanguageDropDown />
-    </>
-  );
-
   return (
     <header className={classes.header}>
       <a href={homeUrl} className={`${classes.logoLink} vbp-logo-hoverzone`}>
@@ -76,7 +55,10 @@ export function Header({
         {navLinks()}
       </Group>
       <Group className={classes.headerIcons} gap={0}>
-        {icons}
+        <SearchInput />
+        <HelpDropDown />
+        <LoginDropDown />
+        <LanguageDropDown />
       </Group>
       <Menu
         trigger="click"
@@ -99,10 +81,7 @@ export function Header({
           <Stack className={classes.burgerNav} gap={0}>
             {navLinks(true)}
           </Stack>
-          <BurgerIcons
-            isAuthenticated={isAuthenticated || false}
-            onAuthClick={onAuthClick}
-          />
+          <BurgerIcons />
         </Menu.Dropdown>
       </Menu>
     </header>

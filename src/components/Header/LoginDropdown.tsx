@@ -15,9 +15,11 @@ import {
 import classes from "./Header.module.css";
 
 import { MenuDropDownItem } from "./MenuDropDownItem";
-export const loginItems = (
+import { useVBPAuth } from "../auth/VBPAuthProvider";
+
+const loginItems = (
   isAuthenticated: boolean,
-  onAuthClick?: React.MouseEventHandler<HTMLButtonElement>,
+  onAuthClick: React.MouseEventHandler<HTMLButtonElement>,
 ) =>
   isAuthenticated
     ? [
@@ -32,14 +34,22 @@ export const loginItems = (
       ]
     : [{ id: "login", onClick: onAuthClick, icon: faRightToBracket }];
 
-interface LoginDropDownProps {
-  isAuthenticated: boolean;
-  onAuthClick?: React.MouseEventHandler<HTMLButtonElement>;
+/**
+ * Auth state and the login/logout menu entries, straight from the auth context.
+ * Must be rendered inside a `VBPAuthProviderWrapper`.
+ */
+export function useLoginItems() {
+  const { isAuthenticated, login, logout } = useVBPAuth();
+  return {
+    isAuthenticated,
+    items: loginItems(isAuthenticated, () =>
+      void (isAuthenticated ? logout() : login()),
+    ),
+  };
 }
-export function LoginDropDown({
-  isAuthenticated,
-  onAuthClick,
-}: LoginDropDownProps) {
+
+export function LoginDropDown() {
+  const { isAuthenticated, items } = useLoginItems();
   return (
     <Menu
       trigger="hover"
@@ -63,7 +73,7 @@ export function LoginDropDown({
       <Menu.Dropdown
         className={`${classes.dropDown} ${classes.LanguageDropDown}`}
       >
-        {loginItems(isAuthenticated, onAuthClick).map((item, i) =>
+        {items.map((item, i) =>
           item ? (
             <MenuDropDownItem key={item.id} {...item} />
           ) : (

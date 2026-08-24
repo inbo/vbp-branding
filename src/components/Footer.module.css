@@ -1,6 +1,7 @@
 .footer {
-  width: 100%;
+  width: 100vw;
   position: relative;
+  overflow-x: hidden;
 
   padding: 1em;
   border-top: 1px solid var(--mantine-primary-color-filled);
@@ -12,11 +13,13 @@
 }
 
 .logo {
-  height: 100px;
+  text-align: center;
 }
 
 .vlaanderenLogo {
-  height: 100px;
+  max-height: 100px;
+  max-width: 100%;
+  height: auto;
 }
 
 .center {
