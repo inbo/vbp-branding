@@ -1,6 +1,16 @@
+/* ponytail: sticky needs a >=100vh ancestor; give it one without asking consumers.
+   Ceiling: extra wrappers between #root and the footer, then the app must set min-height itself. */
+:global(html),
+:global(body),
+:global(#root) {
+  min-height: 100vh;
+}
+
 .footer {
-  width: 100vw;
-  position: relative;
+  width: 100%;
+  /* ponytail: sticky+top:100vh = sticky footer without touching parent layout */
+  position: sticky;
+  top: 100vh;
   overflow-x: hidden;
 
   padding: 1em;

@@ -1,11 +1,14 @@
 import { Flex, Group } from "@mantine/core";
 import classes from "./Footer.module.css";
+import { SUPPORTED_LOCALE, useVBPLocale } from "./I18n/VBPIntlProvider";
 
 export function Footer({
   fullWidth = true,
 }: {
   fullWidth?: boolean;
 }): React.ReactElement {
+  const [locale, setLocale] = useVBPLocale();
+
   return (
     <footer className={classes.footer}>
       <Flex justify="space-between" direction={{ base: "column", sm: "row" }}>
@@ -61,19 +64,20 @@ export function Footer({
         </div>
         <Group className={classes.language}>
           <a
-            href="https://www.vlaanderen.be/inbo"
+            href="#"
             hrefLang="nl"
             lang="nl"
-            target="_blank"
             rel="alternate"
+            onClick={() => setLocale(SUPPORTED_LOCALE.NL)}
           >
             nl
           </a>
           <a
-            href="https://www.vlaanderen.be/inbo/en-gb/homepage/"
+            href="#"
             hrefLang="en"
             lang="en"
             rel="alternate"
+            onClick={() => setLocale(SUPPORTED_LOCALE.EN)}
           >
             en
           </a>
