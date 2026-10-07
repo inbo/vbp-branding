@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "@atlasoflivingaustralia/ala-mantine",
+      "name": "@inbo/vbp-branding",
       "dependencies": {
         "@mantine/form": "^9.5.1",
         "react-cookie": "^8.1.2",
