@@ -1,6 +1,6 @@
 {
   "name": "@inbo/vbp-branding",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "main": "dist/index.mjs",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
