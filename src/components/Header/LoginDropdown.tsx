@@ -19,6 +19,7 @@ import { useVBPAuth } from "../auth/VBPAuthProvider";
 
 const loginItems = (
   isAuthenticated: boolean,
+  userId: string | null,
   onAuthClick: React.MouseEventHandler<HTMLButtonElement>,
 ) =>
   isAuthenticated
@@ -26,7 +27,11 @@ const loginItems = (
         { id: "my-profile", url: "/my-profile.html", icon: faIdBadge },
         null,
         { id: "my-lists", url: "/poc/species-lists/", icon: faListCheck },
-        { id: "my-annotation", url: "/poc/species-lists/", icon: faFlag },
+        {
+          id: "my-annotation",
+          url: `biocache-hub/occurrences/search/?q=*:*&fq=assertion_user_id:%22${userId}%22`,
+          icon: faFlag,
+        },
         { id: "my-alerts", url: "/alerts/", icon: faBell },
         { id: "my-analysis", url: "/spatial-hub/?tool=log", icon: faMap },
         null,
@@ -39,11 +44,13 @@ const loginItems = (
  * Must be rendered inside a `VBPAuthProviderWrapper`.
  */
 export function useLoginItems() {
-  const { isAuthenticated, login, logout } = useVBPAuth();
+  const { isAuthenticated, login, logout, userId } = useVBPAuth();
   return {
     isAuthenticated,
-    items: loginItems(isAuthenticated, () =>
-      void (isAuthenticated ? logout() : login()),
+    items: loginItems(
+      isAuthenticated,
+      userId,
+      () => void (isAuthenticated ? logout() : login()),
     ),
   };
 }
