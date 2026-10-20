@@ -33,6 +33,8 @@
 
 .title {
   margin-right: var(--mantine-spacing-xs);
+  font-size: large;
+  text-transform: uppercase;
 
   @media (max-width: 75em) {
     display: none;
