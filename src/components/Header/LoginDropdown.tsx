@@ -26,10 +26,10 @@ const loginItems = (
     ? [
         { id: "my-profile", url: "/my-profile.html", icon: faIdBadge },
         null,
-        { id: "my-lists", url: "/poc/species-lists/", icon: faListCheck },
+        { id: "my-lists", url: "/lists/my-lists", icon: faListCheck },
         {
           id: "my-annotation",
-          url: `biocache-hub/occurrences/search/?q=*:*&fq=assertion_user_id:%22${userId}%22`,
+          url: `/biocache-hub/occurrences/search/?q=*:*&fq=assertion_user_id:%22${userId}%22`,
           icon: faFlag,
         },
         { id: "my-alerts", url: "/alerts/", icon: faBell },
