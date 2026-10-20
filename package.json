@@ -23,7 +23,8 @@
   "scripts": {
     "build": "vite build && npm run build:sw && cp src/static/favicon.svg src/static/favicon.ico dist/",
     "dev": "vite build --watch",
-    "build:sw": "esbuild src/components/auth/service-worker.ts --bundle --minify --format=iife --target=es2020 --outfile=dist/service-worker.js"
+    "build:sw": "esbuild src/components/auth/service-worker.ts --bundle --minify --format=iife --target=es2020 --outfile=dist/service-worker.js",
+    "test": "vitest run"
   },
   "peerDependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
@@ -44,9 +45,12 @@
     "@fortawesome/react-fontawesome": "^3.1.1",
     "@mantine/core": "^8.3.10",
     "@mantine/hooks": "^8.3.10",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
     "@types/node": "^25.0.3",
     "@types/react": "^18.0.0",
     "@vitejs/plugin-react": "^5.1.2",
+    "happy-dom": "^21.0.1",
     "oidc-client-ts": "^3.5.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
@@ -54,7 +58,8 @@
     "sass-embedded": "^1.100.0",
     "typescript": "^5.9.3",
     "vite": "^7.3.0",
-    "vite-plugin-dts": "^4.5.4"
+    "vite-plugin-dts": "^4.5.4",
+    "vitest": "^5.0.4"
   },
   "description": "Shared ALA theming & components using the Mantine component library",
   "repository": "https://github.com/inbo/vbp-branding.git",

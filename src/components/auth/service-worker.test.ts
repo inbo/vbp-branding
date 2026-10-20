@@ -68,7 +68,7 @@ describe("Service Worker Auth Tests", () => {
                 type: "authLoaded",
                 accessToken: {
                     token: "test-access-token",
-                    expiresAtMs: Date.now() + 60_000,
+                    expiresAt: Date.now() + 60_000,
                 },
             },
         });
@@ -247,7 +247,7 @@ describe("Service Worker Auth Tests", () => {
         );
     });
 
-    test("Given url does not match biocache-service, do not block or perform custom request", async () => {
+    test("Given url does not match a jwt path, do not block or perform custom request", async () => {
         // GIVEN
         const request = new Request("http://test.com/some-other-service/test");
         const fetchEvent = {
@@ -265,6 +265,232 @@ describe("Service Worker Auth Tests", () => {
         // THEN
         expect(global.fetch).not.toBeCalled();
         expect(fetchEvent.respondWith).not.toBeCalled();
+    });
+
+    test("Given a navigation request for a jwt path, do not modify it", async () => {
+        // GIVEN: navigate-mode requests cannot be constructed, so stub one
+        const request = {
+            url: "http://test.com/species-list/page",
+            mode: "navigate",
+        } as unknown as Request;
+        const fetchEvent = {
+            request,
+            respondWith: vi.fn(),
+        };
+
+        await mockSelf.trigger("install", { waitUntil: vi.fn() });
+        await mockSelf.trigger("activate");
+        vi.mocked(cookieStore.get).mockResolvedValue({
+            value: "test-auth-cookie",
+        });
+
+        // WHEN
+        await mockSelf.trigger("fetch", fetchEvent);
+
+        // THEN
+        expect(global.fetch).not.toBeCalled();
+        expect(fetchEvent.respondWith).not.toBeCalled();
+    });
+
+    test("Given a request that already carries an Authorization header, do not modify it", async () => {
+        // GIVEN
+        const request = new Request("http://test.com/species-list/ws/test", {
+            headers: { Authorization: "Bearer app-token" },
+        });
+        const fetchEvent = {
+            request,
+            respondWith: vi.fn(),
+        };
+        const response = new Response("MOCKED", { status: 200 });
+        global.fetch = vi.fn().mockResolvedValue(response);
+
+        await mockSelf.trigger("install", { waitUntil: vi.fn() });
+        await mockSelf.trigger("activate");
+        vi.mocked(cookieStore.get).mockResolvedValue({
+            value: "test-auth-cookie",
+        });
+
+        // WHEN
+        await mockSelf.trigger("fetch", fetchEvent);
+        await new Promise((r) => setTimeout(r, 100));
+
+        // THEN
+        expect(global.fetch).toHaveBeenCalledWith(fetchEvent.request);
+        expect(await fetchEvent.respondWith.mock.calls[0][0]).toBe(response);
+    });
+
+    test("Given a 401 response, request a renewed token and retry once with it", async () => {
+        // GIVEN
+        const request = new Request("http://test.com/species-list/ws/test");
+        const fetchEvent = {
+            request,
+            respondWith: vi.fn(),
+        };
+        const unauthorized = new Response("UNAUTHORIZED", { status: 401 });
+        const authorized = new Response("MOCKED", { status: 200 });
+        global.fetch = vi.fn()
+            .mockResolvedValueOnce(unauthorized)
+            .mockResolvedValueOnce(authorized);
+
+        vi.mocked(cookieStore.get).mockResolvedValue({
+            value: "test-auth-cookie",
+        });
+
+        await mockSelf.trigger("install", { waitUntil: vi.fn() });
+        await mockSelf.trigger("activate");
+        await mockSelf.trigger("message", {
+            data: {
+                type: "authLoaded",
+                accessToken: {
+                    token: "stale-access-token",
+                    expiresAtMs: Date.now() + 60_000,
+                },
+            },
+        });
+
+        // WHEN
+        await mockSelf.trigger("fetch", fetchEvent);
+        await new Promise((r) => setTimeout(r, 100));
+
+        // THEN: blocked while waiting for the renewed token
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+        expect((await mockSelf.clients.matchAll())[0].postMessage)
+            .toHaveBeenCalledWith({ type: "requestRenewal" });
+
+        await mockSelf.trigger("message", {
+            data: {
+                type: "authLoaded",
+                accessToken: {
+                    token: "fresh-access-token",
+                    expiresAtMs: Date.now() + 60_000,
+                },
+            },
+        });
+        await new Promise((r) => setTimeout(r, 100));
+
+        // THEN: retried with the fresh token and reported as recovered
+        expect(global.fetch).toHaveBeenCalledTimes(2);
+        expect(global.fetch).toHaveBeenLastCalledWith(
+            expect.objectContaining({
+                headers: new Headers({
+                    Authorization: "Bearer fresh-access-token",
+                }),
+            }),
+        );
+        expect((await mockSelf.clients.matchAll())[0].postMessage)
+            .toHaveBeenCalledWith(
+                expect.objectContaining({
+                    type: "authFailure",
+                    detail: expect.objectContaining({
+                        source: "service-worker",
+                        service: "species-list",
+                        recovered: true,
+                        hadCookie: true,
+                    }),
+                }),
+            );
+        expect(await fetchEvent.respondWith.mock.calls[0][0]).toBe(authorized);
+    });
+
+    test("Given a 401 response and renewal fails, pass the original 401 through without a plain request", async () => {
+        // GIVEN
+        const request = new Request("http://test.com/image-service/ws/test");
+        const fetchEvent = {
+            request,
+            respondWith: vi.fn(),
+        };
+        const unauthorized = new Response("UNAUTHORIZED", { status: 401 });
+        global.fetch = vi.fn().mockResolvedValue(unauthorized);
+
+        vi.mocked(cookieStore.get).mockResolvedValue({
+            value: "test-auth-cookie",
+        });
+
+        await mockSelf.trigger("install", { waitUntil: vi.fn() });
+        await mockSelf.trigger("activate");
+        await mockSelf.trigger("message", {
+            data: {
+                type: "authLoaded",
+                accessToken: {
+                    token: "stale-access-token",
+                    expiresAtMs: Date.now() + 60_000,
+                },
+            },
+        });
+
+        // WHEN
+        await mockSelf.trigger("fetch", fetchEvent);
+        await new Promise((r) => setTimeout(r, 100));
+        await mockSelf.trigger("message", {
+            data: { type: "authLoaded", accessToken: null },
+        });
+        await new Promise((r) => setTimeout(r, 100));
+
+        // THEN: no retried request, the original 401 is passed through
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+        expect((await mockSelf.clients.matchAll())[0].postMessage)
+            .toHaveBeenCalledWith(
+                expect.objectContaining({
+                    type: "authFailure",
+                    detail: expect.objectContaining({
+                        service: "image-service",
+                        recovered: false,
+                    }),
+                }),
+            );
+        expect(await fetchEvent.respondWith.mock.calls[0][0]).toBe(unauthorized);
+    });
+
+    test("Given an expired token, request renewal and inject the fresh token without retrying twice", async () => {
+        // GIVEN
+        const request = new Request("http://test.com/collectory/ws/test");
+        const fetchEvent = {
+            request,
+            respondWith: vi.fn(),
+        };
+        const response = new Response("MOCKED", { status: 200 });
+        global.fetch = vi.fn().mockResolvedValue(response);
+
+        vi.mocked(cookieStore.get).mockResolvedValue({
+            value: "test-auth-cookie",
+        });
+
+        await mockSelf.trigger("install", { waitUntil: vi.fn() });
+        await mockSelf.trigger("activate");
+        await mockSelf.trigger("message", {
+            data: {
+                type: "authLoaded",
+                accessToken: {
+                    token: "expired-access-token",
+                    expiresAtMs: Date.now() - 60_000,
+                },
+            },
+        });
+
+        // WHEN
+        await mockSelf.trigger("fetch", fetchEvent);
+        await new Promise((r) => setTimeout(r, 100));
+        await mockSelf.trigger("message", {
+            data: {
+                type: "authLoaded",
+                accessToken: {
+                    token: "fresh-access-token",
+                    expiresAtMs: Date.now() + 60_000,
+                },
+            },
+        });
+        await new Promise((r) => setTimeout(r, 100));
+
+        // THEN: single request with the fresh token, 401-retry not re-entered
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+        expect(global.fetch).toHaveBeenCalledWith(
+            expect.objectContaining({
+                headers: new Headers({
+                    Authorization: "Bearer fresh-access-token",
+                }),
+            }),
+        );
+        expect(await fetchEvent.respondWith.mock.calls[0][0]).toBe(response);
     });
 });
 
@@ -284,8 +510,12 @@ function createServiceWorkerEnvironment() {
             },
         ),
         skipWaiting: vi.fn(),
+        location: { search: "?authCookieName=VBP-AUTH" },
         clients: {
             claim: vi.fn(),
+            matchAll: vi.fn().mockResolvedValue([
+                { postMessage: vi.fn() },
+            ]),
         },
         trigger: async (event: string, eventObject = {
             waitUntil: vi.fn(),

@@ -1,4 +1,12 @@
 import { User } from "oidc-client-ts";
+import {
+    AUTH_RENEW_REQUEST_EVENT,
+    reportAuthFailure,
+} from "./auth-events";
+import type {
+    AuthFailureMessage,
+    RequestRenewalMessage,
+} from "./service-worker-events";
 
 export class AuthServiceWorker {
   private registrationPromise: Promise<ServiceWorkerRegistration | void>;
@@ -16,6 +24,20 @@ export class AuthServiceWorker {
             console.error("Service Worker registration failed:", error);
           })
       : Promise.resolve();
+
+    // Listen for messages from the service worker (renewal requests and
+    // auth failure reports). Broadcasts go to all clients of the shared worker.
+    navigator.serviceWorker?.addEventListener("message", (event) => {
+      const data = event.data as AuthFailureMessage | RequestRenewalMessage;
+      switch (data?.type) {
+        case "authFailure":
+          reportAuthFailure(data.detail);
+          break;
+        case "requestRenewal":
+          window.dispatchEvent(new CustomEvent(AUTH_RENEW_REQUEST_EVENT));
+          break;
+      }
+    });
   }
 
   async reset() {

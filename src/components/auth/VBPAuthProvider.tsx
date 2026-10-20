@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Cookies } from "react-cookie";
 import {
   SigninRedirectArgs,
@@ -7,6 +7,10 @@ import {
   UserManager,
 } from "oidc-client-ts";
 import { AuthProvider, useAuth } from "react-oidc-context";
+import {
+  AUTH_RENEW_REQUEST_EVENT,
+  reportAuthFailure,
+} from "./auth-events";
 import { AuthServiceWorker } from "./service-worker-registration";
 
 export const AUTH_COOKIE_NAME = "VBP-AUTH";
@@ -32,7 +36,11 @@ const ALA_SERVICE_PATHS = [
   "species-list",
 ];
 
-/** Keycloak SSO idle timeout: after this the cookie is worthless. */
+/** Keycloak SSO idle timeout, and the auth cookie's Max-Age: the browser
+ * deletes the cookie once the session chain it promises can no longer be
+ * honored, so cookie-exists ⇒ fresh by construction. The frontend's regular
+ * refresh token dies with the SSO session — renewal failures drop the user
+ * (logged in everywhere properly, or not at all). */
 const SSO_IDLE_TIMEOUT_MS = 30 * 60 * 1000;
 
 const cookies = new Cookies();
@@ -103,7 +111,7 @@ export function VBPAuthProviderWrapper({
   domain,
   authority,
   clientId,
-  scope = "openid email ala/roles",
+  scope = "openid email ala/roles image-service/read",
   prompt,
   authCookieDomain,
   authCookieName = AUTH_COOKIE_NAME,
@@ -130,7 +138,9 @@ export function VBPAuthProviderWrapper({
       automaticSilentRenew: true,
       monitorSession: false,
       // ponytail: default (session) storage is the only sane option — all ALA
-      // services use server side sessions, so localStorage would desync.
+      // services use server side sessions, so localStorage would desync: the
+      // portal could look logged in (offline token) while every service page
+      // bounces to a login. Better logged in everywhere or nowhere at all.
     });
   }, [authority, clientId, domain, scope, prompt, serviceWorker]);
 
@@ -147,6 +157,7 @@ export function VBPAuthProviderWrapper({
       onSignoutCallback={() => finishCallback(userManager)}
     >
       <AuthStateSync
+        userManager={userManager}
         serviceWorker={serviceWorker}
         authCookieName={authCookieName}
         authCookieDomain={authCookieDomain}
@@ -161,24 +172,56 @@ export function VBPAuthProviderWrapper({
  * sync with the OIDC state, and reconciles the two on startup.
  */
 function AuthStateSync({
+  userManager,
   serviceWorker,
   authCookieName,
   authCookieDomain,
 }: {
+  userManager: UserManager;
   serviceWorker: AuthServiceWorker;
   authCookieName: string;
   authCookieDomain?: string;
 }) {
   const auth = useAuth();
 
-  // Single source of truth: whenever the OIDC user changes, push it out.
+  // Startup reconciliation must run before the sync effect below, otherwise
+  // syncing would re-create the auth cookie before reconciliation could
+  // detect that it was missing (and remove the user to force a re-login).
+  const [reconciled, setReconciled] = useState(false);
   useEffect(() => {
-    if (auth.isLoading) return;
+    if (auth.isLoading || reconciled) return;
+    setReconciled(true);
+
+    const cookie = cookies.get(authCookieName);
+    if (!cookie) {
+      // Logged in everywhere properly, or not at all: without the cookie the
+      // services cannot re-establish their sessions, so drop the frontend
+      // user instead of ending up "logged in" with JWTs only.
+      if (auth.user) void auth.removeUser();
+      return;
+    }
+    if (auth.user) return; // cookie exists ⇒ fresh by construction (see Max-Age)
+
+    // Cookie present ⇒ written recently by a renewal or a service dance:
+    // pick up the live session silently.
+    void auth.signinRedirect();
+  }, [auth.isLoading, reconciled, auth.user, authCookieName]);
+
+  // Single source of truth: whenever the OIDC user changes, push it out.
+  // Gated on reconciliation so it never races the startup decision.
+  useEffect(() => {
+    if (auth.isLoading || !reconciled) return;
     if (auth.user) {
       cookies.set(
         authCookieName,
         { userId: auth.user.profile.sub, refreshedAt: Date.now() },
-        cookieOptions(authCookieDomain),
+        {
+          ...cookieOptions(authCookieDomain),
+          // Browser-enforced freshness: the cookie disappears
+          // SSO_IDLE_TIMEOUT_MS after the last renewal, so its existence is
+          // the freshness signal.
+          expires: new Date(Date.now() + SSO_IDLE_TIMEOUT_MS),
+        },
       );
     } else {
       clearAlaAuthCookies(authCookieName, authCookieDomain);
@@ -187,63 +230,149 @@ function AuthStateSync({
   }, [
     auth.user,
     auth.isLoading,
+    reconciled,
     authCookieName,
     authCookieDomain,
     serviceWorker,
   ]);
 
   useEffect(() => {
-    const onExpired = async () => {
+    const onExpired = () => {
       console.warn("Access token expired");
+      // Background tabs throttle timers and cannot renew reliably (the silent
+      // renew iframe needs third-party cookies); renew when the tab is
+      // visible again, see the visibilitychange handler below.
       if (document.hidden) return;
-      try {
-        await auth.signinSilent({ silentRequestTimeoutInSeconds: 2 });
-      } catch (error) {
-        console.error("Silent login failed", error);
-        await auth.removeUser();
-      }
+      void attemptSilentLogin(userManager, authCookieName);
     };
-    const onRenewError = async (error: Error) => {
+    const onRenewError = (error: Error) => {
       console.error("Silent renew error", error);
-      if (error.name === "NetworkError") {
-        setTimeout(() => void auth.signinSilent(), 1_000);
-      } else {
-        await auth.removeUser();
-      }
+      if (document.hidden) return;
+      void attemptSilentLogin(userManager, authCookieName);
     };
-    const removeExpired = auth.events.addAccessTokenExpired(onExpired);
-    const removeRenewError = auth.events.addSilentRenewError(onRenewError);
+    const removeExpired = userManager.events.addAccessTokenExpired(onExpired);
+    const removeRenewError = userManager.events.addSilentRenewError(onRenewError);
     return () => {
       removeExpired();
       removeRenewError();
     };
-  }, [auth.events, auth.signinSilent, auth.removeUser]);
+  }, [userManager, authCookieName]);
 
-  // Startup reconciliation: the cookie may be set by another ALA service
-  // (or be stale), in which case we log in / out to match it.
-  const reconciled = useRef(false);
+  // The service worker asked for a renewed token (e.g. a request was
+  // rejected with 401 or the stored token expired)
   useEffect(() => {
-    if (auth.isLoading || reconciled.current) return;
-    reconciled.current = true;
+    const onRenewRequest = async () => {
+      if (document.hidden) return;
+      const user = await userManager.getUser();
+      if (!user) return;
+      if (!user.expired) {
+        // The user's token is still valid on our side: republish it so the
+        // service worker can pick it up without a roundtrip to Keycloak
+        await serviceWorker.setAccessToken(user);
+        return;
+      }
+      await attemptSilentLogin(userManager, authCookieName);
+    };
+    window.addEventListener(AUTH_RENEW_REQUEST_EVENT, onRenewRequest);
+    return () =>
+      window.removeEventListener(AUTH_RENEW_REQUEST_EVENT, onRenewRequest);
+  }, [userManager, serviceWorker, authCookieName]);
 
-    const cookie = cookies.get(authCookieName);
-    if (!cookie) {
-      if (auth.user) void auth.removeUser();
-      return;
-    }
-    if (auth.user) return;
-
-    const refreshedAt =
-      typeof cookie === "object" ? Number(cookie.refreshedAt) : NaN;
-    if (refreshedAt && Date.now() - refreshedAt < SSO_IDLE_TIMEOUT_MS) {
-      // Another service still has a live SSO session — pick it up silently.
-      void auth.signinRedirect();
-    } else {
-      clearAlaAuthCookies(authCookieName, authCookieDomain);
-    }
-  }, [auth.isLoading]);
+  // Renew proactively when the user returns to the tab, before the first
+  // request they trigger can hit a backend with an expired token
+  useEffect(() => {
+    const onVisible = async () => {
+      if (document.visibilityState !== "visible") return;
+      const user = await userManager.getUser();
+      if (!user || !user.expires_at) return;
+      const expiresAtMs = user.expires_at * 1000;
+      if (expiresAtMs <= Date.now() + 60_000) {
+        await attemptSilentLogin(userManager, authCookieName);
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () =>
+      document.removeEventListener("visibilitychange", onVisible);
+  }, [userManager, authCookieName]);
 
   return null;
+}
+
+const renewalRetryDelaysMs = [1_000, 2_000, 4_000];
+
+let silentRenewalInFlight: Promise<User | null> | null = null;
+
+/**
+ * Attempt to renew the session silently, with retries and backoff.
+ * Concurrent calls share a single renewal. The user is only dropped when
+ * renewal definitively failed (e.g. Keycloak reports login_required) or all
+ * retries were exhausted.
+ */
+export function attemptSilentLogin(
+  manager: UserManager,
+  authCookieName: string,
+): Promise<User | null> {
+  if (!silentRenewalInFlight) {
+    silentRenewalInFlight = doSilentLogin(manager, authCookieName).finally(
+      () => {
+        silentRenewalInFlight = null;
+      },
+    );
+  }
+  return silentRenewalInFlight;
+}
+
+async function doSilentLogin(
+  manager: UserManager,
+  authCookieName: string,
+): Promise<User | null> {
+  if (!(await manager.getUser())) {
+    return null;
+  }
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await manager.signinSilent();
+    } catch (error) {
+      console.error("Silent login failed", error);
+      if (
+        isDefinitiveRenewalFailure(error) ||
+        attempt >= renewalRetryDelaysMs.length
+      ) {
+        reportAuthFailure({
+          source: "renewal",
+          service: "",
+          path: "",
+          recovered: false,
+          hadToken: false,
+          hadCookie: !!cookies.get(authCookieName),
+        });
+        await manager.removeUser();
+        return null;
+      }
+      await new Promise((resolve) =>
+        setTimeout(resolve, renewalRetryDelaysMs[attempt]),
+      );
+    }
+  }
+}
+
+/**
+ * Renewal failures that retrying cannot fix. login_required-class errors mean
+ * the Keycloak session is gone; invalid_grant means the refresh token died
+ * with it (e.g. the SSO session idled out while the tab was hidden). In both
+ * cases the correct outcome is dropping the user, per the "logged in
+ * everywhere properly, or not at all" rule.
+ */
+export function isDefinitiveRenewalFailure(error: unknown): boolean {
+  const err = error as { error?: string; message?: string };
+  const definitiveErrors = [
+    "interaction_required",
+    "login_required",
+    "consent_required",
+    "invalid_grant",
+  ];
+  return definitiveErrors.includes(err?.error ?? "") ||
+    definitiveErrors.some((e) => err?.message?.includes(e));
 }
 
 async function finishCallback(manager: UserManager) {
@@ -270,7 +399,7 @@ function clearAlaAuthCookies(name: string, domain?: string) {
 }
 
 /** JSESSIONIDs are path-scoped on the current host, so they need no config. */
-function clearServiceSessionCookies() {
+export function clearServiceSessionCookies() {
   for (const path of ALA_SERVICE_PATHS) {
     cookies.remove("JSESSIONID", { ...cookieOptions(), path: `/${path}` });
   }
@@ -281,13 +410,13 @@ function clearServiceSessionCookies() {
  * the callback on return. Applied to caller-supplied overrides too, otherwise
  * a custom redirect uri would come back unhandled. Relative urls are allowed.
  */
-function authActionUrl(url: string, action: "login" | "logout") {
+export function authActionUrl(url: string, action: "login" | "logout") {
   const target = cleanupUrl(url);
   target.searchParams.set("front-auth-action", action);
   return target.href;
 }
 
-function cleanupUrl(url: string) {
+export function cleanupUrl(url: string) {
   const cleanedUrl = new URL(url, window.location.href);
   for (const param of [
     "front-auth-action",
