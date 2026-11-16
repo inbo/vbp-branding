@@ -1,6 +1,6 @@
 {
   "name": "@inbo/vbp-branding",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "main": "dist/index.mjs",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -9,6 +9,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "default": "./dist/index.mjs"
+    },
+    "./auth": {
+      "types": "./dist/auth.d.ts",
+      "import": "./dist/auth.mjs",
+      "default": "./dist/auth.mjs"
     },
     "./styles": "./dist/index.css",
     "./favicon.svg": "./dist/favicon.svg",
@@ -35,8 +40,48 @@
     "@mantine/hooks": "^7.17.8",
     "oidc-client-ts": "^3.5.0",
     "react": "^18.x || ^19.x",
+    "react-cookie": "^8.1.2",
     "react-dom": "^18.x || ^19.x",
+    "react-intl": "^10.1.14",
     "react-oidc-context": "^3.3.1"
+  },
+  "peerDependenciesMeta": {
+    "@fortawesome/fontawesome-svg-core": {
+      "optional": true
+    },
+    "@fortawesome/free-regular-svg-icons": {
+      "optional": true
+    },
+    "@fortawesome/free-solid-svg-icons": {
+      "optional": true
+    },
+    "@fortawesome/react-fontawesome": {
+      "optional": true
+    },
+    "@mantine/core": {
+      "optional": true
+    },
+    "@mantine/hooks": {
+      "optional": true
+    },
+    "oidc-client-ts": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "react-cookie": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    },
+    "react-intl": {
+      "optional": true
+    },
+    "react-oidc-context": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.1.0",
@@ -53,7 +98,9 @@
     "happy-dom": "^21.0.1",
     "oidc-client-ts": "^3.5.0",
     "react": "^18.0.0",
+    "react-cookie": "^8.1.2",
     "react-dom": "^18.0.0",
+    "react-intl": "10.1.20",
     "react-oidc-context": "^3.3.1",
     "sass-embedded": "^1.100.0",
     "typescript": "^5.9.3",
@@ -68,10 +115,5 @@
   "private": false,
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
-  },
-  "dependencies": {
-    "@mantine/form": "^9.5.1",
-    "react-cookie": "^8.1.2",
-    "react-intl": "10.1.20"
   }
 }

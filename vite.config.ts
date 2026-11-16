@@ -27,9 +27,14 @@ export default defineConfig({
   ],
   build: {
     lib: {
-      entry: path.resolve(__dirname, "src/index.ts"),
+      entry: {
+        index: path.resolve(__dirname, "src/index.ts"),
+        // React-free entry, see src/auth.ts
+        auth: path.resolve(__dirname, "src/auth.ts"),
+      },
       formats: ["es"],
-      fileName: "index",
+      fileName: (_format, entryName) => `${entryName}.mjs`,
+      cssFileName: "index",
     },
     rollupOptions: {
       external: [
