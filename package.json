@@ -1,6 +1,6 @@
 {
   "name": "@inbo/vbp-branding",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "main": "dist/index.mjs",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -30,58 +30,6 @@
     "dev": "vite build --watch",
     "build:sw": "esbuild src/components/auth/service-worker.ts --bundle --minify --format=iife --target=es2020 --outfile=dist/service-worker.js",
     "test": "vitest run"
-  },
-  "peerDependencies": {
-    "@fortawesome/fontawesome-svg-core": "^6.6.0",
-    "@fortawesome/free-regular-svg-icons": "^6.6.0",
-    "@fortawesome/free-solid-svg-icons": "^6.6.0",
-    "@fortawesome/react-fontawesome": "^0.2.2",
-    "@mantine/core": "^7.17.8",
-    "@mantine/hooks": "^7.17.8",
-    "oidc-client-ts": "^3.5.0",
-    "react": "^18.x || ^19.x",
-    "react-cookie": "^8.1.2",
-    "react-dom": "^18.x || ^19.x",
-    "react-intl": "^10.1.14",
-    "react-oidc-context": "^3.3.1"
-  },
-  "peerDependenciesMeta": {
-    "@fortawesome/fontawesome-svg-core": {
-      "optional": true
-    },
-    "@fortawesome/free-regular-svg-icons": {
-      "optional": true
-    },
-    "@fortawesome/free-solid-svg-icons": {
-      "optional": true
-    },
-    "@fortawesome/react-fontawesome": {
-      "optional": true
-    },
-    "@mantine/core": {
-      "optional": true
-    },
-    "@mantine/hooks": {
-      "optional": true
-    },
-    "oidc-client-ts": {
-      "optional": true
-    },
-    "react": {
-      "optional": true
-    },
-    "react-cookie": {
-      "optional": true
-    },
-    "react-dom": {
-      "optional": true
-    },
-    "react-intl": {
-      "optional": true
-    },
-    "react-oidc-context": {
-      "optional": true
-    }
   },
   "devDependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.1.0",

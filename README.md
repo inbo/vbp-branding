@@ -17,10 +17,25 @@
 
 ## Prerequisites
 
-This library requires the following peer dependencies in your dependant project:
+The main entry (`@inbo/vbp-branding`) imports the packages below, your project has to install them itself:
 
-- React `18.2.0` or newer
-- Mantine `7.12.0` or newer
+- `react` and `react-dom` `18.x` or `19.x`
+- `@mantine/core` and `@mantine/hooks` `7.17.8` or newer
+- `@fortawesome/fontawesome-svg-core`, `@fortawesome/free-regular-svg-icons`, `@fortawesome/free-solid-svg-icons` and `@fortawesome/react-fontawesome`
+- `react-intl` and `react-cookie`
+- `oidc-client-ts` and `react-oidc-context`
+
+They are deliberately not declared as `peerDependencies`: GitHub Packages drops
+`peerDependenciesMeta` from its registry metadata, so npm would install all of
+them for consumers that only use the React-free `@inbo/vbp-branding/auth` entry.
+
+### React-free entry
+
+`@inbo/vbp-branding/auth` exports the auth service worker registration
+(`AuthServiceWorker`) and the auth events without importing React, Mantine or
+CSS. The matching prebuilt worker is `@inbo/vbp-branding/service-worker.js`;
+serve it at `/service-worker.js`. There is one service worker per origin, so
+every application on the portal has to register this same file.
 
 ## Installation
 
