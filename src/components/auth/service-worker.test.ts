@@ -334,6 +334,30 @@ describe("Service Worker Auth Tests", () => {
         expect(fetchEvent.respondWith).not.toBeCalled();
     });
 
+    test("Given an only-if-cached request for a jwt path, do not modify it", async () => {
+        // GIVEN: happy-dom's Request drops the cache mode, so stub one
+        const request = {
+            url: "http://test.com/species-list/ws/test",
+            mode: "same-origin",
+            cache: "only-if-cached",
+        } as unknown as Request;
+        const fetchEvent = {
+            request,
+            respondWith: vi.fn(),
+        };
+        global.fetch = vi.fn();
+        vi.mocked(cookieStore.get).mockResolvedValue({
+            value: "test-auth-cookie",
+        });
+
+        // WHEN
+        await mockSelf.trigger("fetch", fetchEvent);
+
+        // THEN the browser answers it from its cache itself
+        expect(global.fetch).not.toBeCalled();
+        expect(fetchEvent.respondWith).not.toBeCalled();
+    });
+
     test("Given a request that already carries an Authorization header, do not modify it", async () => {
         // GIVEN
         const request = new Request("http://test.com/species-list/ws/test", {

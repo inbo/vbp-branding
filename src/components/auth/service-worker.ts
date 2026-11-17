@@ -240,6 +240,11 @@ self.addEventListener("fetch", (event: any) => {
     if (event.request.mode === "navigate") {
         return;
     }
+    // Cache-only lookups (e.g. issued by DevTools) must stay same-origin:
+    // re-issuing them as cors requests with a token throws a TypeError
+    if (event.request.cache === "only-if-cached") {
+        return;
+    }
     const pathname = new URL(event.request.url).pathname;
     if (excludedPaths.some((pattern) => pattern.test(pathname))) {
         return;
