@@ -204,17 +204,30 @@ export class VBPAuthClient {
   }
 
   private async start() {
-    await this.handleAuthCallback();
+    const loginCallbackFailed = await this.handleAuthCallback();
 
     const user = await this.userManager.getUser();
     const cookie = hasAuthCookie(this.authCookieName);
-    if (cookie && !user) {
+    if (cookie && !user && loginCallbackFailed) {
+      // We just came back from a failed (e.g. login_required) login: the
+      // cookie promised a session that is gone. Stay logged out instead of
+      // redirecting again, which would loop.
+      clearAuthCookies(this.authCookieName, this.authCookieDomain);
+      await this.serviceWorker.setAccessToken(null);
+    } else if (cookie && !user) {
       // The cookie exists ⇒ it was written recently by a renewal or a
-      // service: pick up the live session. Not awaited: the redirect promise
-      // only settles if the page is restored from the back/forward cache.
-      this.userManager.signinRedirect().catch((error) => {
-        console.error("Login redirect failed", error);
-      });
+      // service: try to pick up the live session. Never interactive: the
+      // cookie outlives the SSO session (e.g. across a browser restart), and
+      // an unsolicited login form cannot be cancelled. With prompt=none
+      // Keycloak returns at once, with a code or with login_required.
+      // `replace` keeps this bounce out of the history.
+      // Not awaited: the redirect promise only settles if the page is
+      // restored from the back/forward cache.
+      this.userManager
+        .signinRedirect({ prompt: "none", redirectMethod: "replace" })
+        .catch((error) => {
+          console.error("Login redirect failed", error);
+        });
     } else if (cookie && user) {
       await this.serviceWorker.setAccessToken(user);
     } else if (user) {
@@ -226,13 +239,16 @@ export class VBPAuthClient {
     }
   }
 
-  private async handleAuthCallback() {
+  /** Returns true when a login callback failed, see {@link start}. */
+  private async handleAuthCallback(): Promise<boolean> {
     const action = new URLSearchParams(window.location.search).get(
       "front-auth-action",
     );
     if (!action) {
-      return;
+      return false;
     }
+    logAuthCallbackError(action);
+    let loginCallbackFailed = false;
     try {
       if (action === "login") {
         await this.userManager.signinCallback();
@@ -240,6 +256,7 @@ export class VBPAuthClient {
         await this.userManager.signoutCallback();
       }
     } catch (error) {
+      loginCallbackFailed = action === "login";
       // Can occur on a refresh or an old url from the history
       const message = (error as Error)?.message ?? "";
       if (message.includes("No matching state found in storage")) {
@@ -254,6 +271,37 @@ export class VBPAuthClient {
       document.title,
       cleanupUrl(window.location.href),
     );
+    return loginCallbackFailed;
+  }
+}
+
+/** Errors that the non-interactive startup login returns when there simply is no SSO session. */
+const expectedCallbackErrors = [
+  "login_required",
+  "interaction_required",
+  "consent_required",
+];
+
+/**
+ * Log the OIDC error parameters of a callback url before they are cleaned up,
+ * so a failed login or logout can still be diagnosed from the console.
+ */
+function logAuthCallbackError(action: string) {
+  const params = new URLSearchParams(window.location.search);
+  const error = params.get("error");
+  if (!error) {
+    return;
+  }
+  const details = {
+    action,
+    error,
+    error_description: params.get("error_description"),
+    error_uri: params.get("error_uri"),
+  };
+  if (expectedCallbackErrors.includes(error)) {
+    console.warn("Auth callback returned an error (no SSO session)", details);
+  } else {
+    console.error("Auth callback returned an error", details);
   }
 }
 
@@ -375,6 +423,9 @@ export function cleanupUrl(url: string) {
     "sessionState",
     "session_state",
     "iss",
+    "error",
+    "error_description",
+    "error_uri",
   ]) {
     cleanedUrl.searchParams.delete(param);
   }

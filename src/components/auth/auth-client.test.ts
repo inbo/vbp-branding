@@ -173,13 +173,99 @@ describe("startup reconciliation", () => {
         ]);
     });
 
-    test("redirects to login when the cookie exists but there is no user", async () => {
+    test("redirects to a non-interactive login when the cookie exists but there is no user", async () => {
         const signinRedirect = vi.spyOn(UserManager.prototype, "signinRedirect");
-        const { client } = createClient({ presetCookie: true });
+        // An app-wide interactive prompt must not leak into this redirect
+        const { client } = createClient({
+            presetCookie: true,
+            settings: { prompt: "login" },
+        });
 
         await client.ready;
 
         expect(signinRedirect).toHaveBeenCalledTimes(1);
+        expect(signinRedirect).toHaveBeenCalledWith({
+            prompt: "none",
+            redirectMethod: "replace",
+        });
+    });
+
+    test("stays logged out when the non-interactive login comes back with login_required", async () => {
+        window.history.replaceState(
+            null,
+            "",
+            "/page?front-auth-action=login&error=login_required&error_description=x&state=s&keep=1",
+        );
+        vi.spyOn(UserManager.prototype, "signinCallback")
+            .mockRejectedValue(Object.assign(new Error("login_required"), {
+                error: "login_required",
+            }));
+        const signinRedirect = vi.spyOn(UserManager.prototype, "signinRedirect");
+        const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+        const { client, authCookieName } = createClient({ presetCookie: true });
+
+        await client.ready;
+
+        expect(signinRedirect).not.toHaveBeenCalled();
+        expect(writesOf(authCookieName).filter(isRemoval).length)
+            .toBeGreaterThan(0);
+        expect(window.location.search).toBe("?keep=1");
+        expect(authLoadedMessages().at(-1)).toEqual(
+            { type: "authLoaded", accessToken: null },
+        );
+        expect(warn).toHaveBeenCalledWith(
+            "Auth callback returned an error (no SSO session)",
+            {
+                action: "login",
+                error: "login_required",
+                error_description: "x",
+                error_uri: null,
+            },
+        );
+    });
+
+    test("logs unexpected callback errors as errors", async () => {
+        window.history.replaceState(
+            null,
+            "",
+            "/page?front-auth-action=login&error=invalid_request&error_description=bad+redirect",
+        );
+        vi.spyOn(UserManager.prototype, "signinCallback")
+            .mockRejectedValue(new Error("invalid_request"));
+        const error = vi.spyOn(console, "error").mockImplementation(() => {});
+        const { client } = createClient();
+
+        await client.ready;
+
+        expect(error).toHaveBeenCalledWith("Auth callback returned an error", {
+            action: "login",
+            error: "invalid_request",
+            error_description: "bad redirect",
+            error_uri: null,
+        });
+        expect(window.location.search).toBe("");
+    });
+
+    test("keeps the session when a stale login callback fails but the user exists", async () => {
+        window.history.replaceState(
+            null,
+            "",
+            "/page?front-auth-action=login&code=c&state=s",
+        );
+        vi.spyOn(UserManager.prototype, "signinCallback")
+            .mockRejectedValue(new Error("No matching state found in storage"));
+        vi.spyOn(UserManager.prototype, "getUser")
+            .mockResolvedValue(makeUser(3600));
+        const { client, authCookieName } = createClient({ presetCookie: true });
+
+        await client.ready;
+
+        expect(writesOf(authCookieName).filter(isRemoval)).toEqual([]);
+        expect(authLoadedMessages().at(-1)).toEqual(
+            expect.objectContaining({
+                accessToken: expect.objectContaining({ token: "access-token-1" }),
+            }),
+        );
     });
 
     test("does not wait for the login redirect to settle", async () => {
