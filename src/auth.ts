@@ -4,10 +4,26 @@
 // it is consumed by the static portal pages and the Grails service
 // header/footer bundles, which do not ship React.
 //
+// The whole frontend auth lifecycle lives in `VBPAuthClient`; the static
+// portal and the React provider are thin adapters over it, so they cannot
+// drift apart.
+//
 // The matching service worker is published prebuilt as
 // `@inbo/vbp-branding/service-worker.js`. There is one service worker per
 // origin, so every consumer has to serve that same file at
-// `/service-worker.js` and register it through `AuthServiceWorker`.
+// `/service-worker.js`.
+export {
+    VBPAuthClient,
+    getVBPAuthClient,
+    DEFAULT_AUTH_SCOPE,
+    type VBPAuthSettings,
+} from "./components/auth/auth-client";
+
+export {
+    AUTH_COOKIE_NAME,
+    hasAuthCookie,
+} from "./components/auth/auth-cookies";
+
 export {
     AUTH_FAILURE_EVENT,
     AUTH_RENEW_REQUEST_EVENT,

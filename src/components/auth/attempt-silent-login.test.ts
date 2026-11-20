@@ -10,7 +10,7 @@ import { afterEach, describe, expect, test, vi } from "vitest";
  * The manager is a plain stub: only getUser/signinSilent/removeUser are used.
  */
 function loadModule() {
-    return import("./VBPAuthProvider");
+    return import("./auth-client");
 }
 
 const user = { profile: { sub: "user-1" } };
