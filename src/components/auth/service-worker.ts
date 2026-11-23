@@ -15,28 +15,60 @@ const authCookieName =
     new URLSearchParams(self.location.search).get("authCookieName") ||
     "VBP-AUTH";
 
-const jwtPaths = [
-    "/biocache-service/",
-    "/spatial-hub/portal/",
-    "/species-list/",
-    "/image-service/",
-    "/collectory/",
-    "/alerts/",
-    "/logger/",
-    "/regions/",
-    "/spatial-service/",
-    "/data-quality-filter-service/",
+// Same-origin API paths that honour a bearer JWT. Everything else (pages,
+// assets, HTML fragments, session-only controller actions) is left to the
+// browser: those endpoints authenticate with the service's session cookie
+// only, and many answer a missing session with an OIDC redirect, which fails
+// once the request is re-issued in cors mode.
+//
+// Keep this list narrow: add a path only when the service checks the JWT on
+// it (a global JWT filter, or @RequireApiKey / an explicit JWT check) and a
+// browser page actually calls it. See wiki/Authentication.md in the portal
+// repository.
+const jwtPaths: RegExp[] = [
+    // A global JWT filter on every path: RBAC filters search results, WMS
+    // tiles, facets and record views by the user's roles.
+    /^\/biocache-service\//,
+    // biocache-service with the sandbox config, e.g. the user's own uploads
+    /^\/sandbox-service\//,
+    // species-lists (lists-service): a global JWT filter, private lists
+    /^\/api\/lists\//,
+    // collectory: hand-written JWT check (editor role) on its /ws/ routes.
+    // /ws/ipt/scan is also behind the redirecting page filter, so a bearer-only
+    // request gets a redirect there.
+    /^\/collectory\/ws\/(?!ipt\/scan)/,
+    // image-service: @RequireApiKey on its web services. Only /ws/: the image
+    // bytes (/image/<id>/original|thumbnail*|large|tms/…, /store/…,
+    // /proxyImage*) live outside it and must stay plain browser requests (no
+    // token needed, and an <img> must never be re-issued in cors mode).
+    /^\/image-service\/ws\//,
+    // alerts: @RequireApiKey on the user alert API and annotation subscriptions
+    /^\/alerts\/api\//,
+    /^\/alerts\/ws\/(subscribeMyAnnotationWS|unsubscribeMyAnnotationWS)\b/,
+    // legacy species-list: only saveList honours a user JWT
+    /^\/species-list\/ws\/speciesList(Post)?\//,
+    // spatial-service: the @RequireApiKey actions only
+    /^\/spatial-service\/shape\/upload\/(?!shp\/image\/)/,
+    /^\/spatial-service\/tasks\/(create|cancel)\b/,
+    /^\/spatial-service\/(workflow|sandbox|log)\//,
+    /^\/spatial-service\/layer\/download\b/,
+    /^\/spatial-service\/master\/resource/,
+    // logger-service web services (not verified against its source)
+    /^\/logger\/service\//,
 ];
 
-// Static image bytes (used by <img>, CSS backgrounds, tile layers) must never be
-// re-issued as CORS fetches: if the service answers with an OIDC redirect, a
-// cross-origin redirect to Keycloak fails CORS, while the browser's own no-cors
-// request would follow it fine. These paths are also excluded from the
-// image-service's security filter (uriExclusionFilterPattern).
-const excludedPaths = [
-    /\/image-service\/image\/[^/]+\/(original|thumbnail|large|tms\/)/,
-    /\/image-service\/store\//,
-];
+// Scripts, stylesheets and fonts are static assets that never need a token.
+// They must not wait for one either: classic scripts and stylesheets in the
+// <head> block the parser, so the page's own auth code (a deferred module)
+// cannot run and answer the renewal request until they have loaded. When the
+// worker has no token in memory yet (it was stopped after being idle, or the
+// browser was restarted), every uncached asset of a service page would stall
+// for RENEWAL_TIMEOUT_MS and then fail with a 401.
+const staticDestinations = new Set<RequestDestination>([
+    "script",
+    "style",
+    "font",
+]);
 
 const RENEWAL_TIMEOUT_MS = 5_000;
 
@@ -245,11 +277,15 @@ self.addEventListener("fetch", (event: any) => {
     if (event.request.cache === "only-if-cached") {
         return;
     }
-    const pathname = new URL(event.request.url).pathname;
-    if (excludedPaths.some((pattern) => pattern.test(pathname))) {
+    if (staticDestinations.has(event.request.destination)) {
         return;
     }
-    if (jwtPaths.some((path) => event.request.url.includes(path))) {
+    const url = new URL(event.request.url);
+    // Never hand the user's token to another origin
+    if (url.origin !== self.location.origin) {
+        return;
+    }
+    if (jwtPaths.some((pattern) => pattern.test(url.pathname))) {
         console.debug(
             "Service Worker: Fetch for authenticated service:",
             event.request.url,

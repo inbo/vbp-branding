@@ -37,7 +37,17 @@ describe("Service Worker Auth Tests", () => {
         "http://test.com/image-service/image/817b5a11/original",
         "http://test.com/image-service/image/817b5a11/thumbnail",
         "http://test.com/image-service/image/817b5a11/tms/1/2/3.png",
+        "http://test.com/image-service/image/817b5a11/xlarge",
+        "http://test.com/image-service/image/817b5a11/thumbnail_square",
         "http://test.com/image-service/store/1/2/3/817b5a11/original",
+        "http://test.com/image-service/store/1/2/3/817b5a11/thumbnail",
+        "http://test.com/image-service/store/1/2/3/817b5a11/tms/1/2/3.png",
+        "http://test.com/image-service/image/proxyImageThumbnail?imageId=817b5a11",
+        "http://test.com/image-service/image/proxyImageThumbnailLarge?imageId=817b5a11",
+        "http://test.com/image-service/image/proxyImageTile?imageId=817b5a11",
+        "http://test.com/image-service/image/proxyImage?imageId=817b5a11",
+        "http://test.com/image-service/proxyImageThumbnail?imageId=817b5a11",
+        "http://test.com/image-service/proxyImage?imageId=817b5a11",
     ])("Given auth cookie is set, image bytes are not intercepted: %s", async (url) => {
         // GIVEN
         const fetchEvent = {
@@ -72,6 +82,77 @@ describe("Service Worker Auth Tests", () => {
         await mockSelf.trigger("fetch", fetchEvent);
 
         expect(fetchEvent.respondWith).toHaveBeenCalled();
+    });
+
+    test.each([
+        "http://test.com/biocache-service/occurrences/search?q=*:*",
+        "http://test.com/biocache-service/mapping/wms/reflect",
+        "http://test.com/sandbox-service/occurrences/search",
+        "http://test.com/api/lists/ws/species/abc",
+        "http://test.com/collectory/ws/dataResource/dr1",
+        "http://test.com/image-service/ws/batchstatus",
+        "http://test.com/alerts/api/alerts/user/createAlerts",
+        "http://test.com/alerts/ws/subscribeMyAnnotationWS",
+        "http://test.com/species-list/ws/speciesList/dr1",
+        "http://test.com/species-list/ws/speciesListPost/dr1",
+        "http://test.com/spatial-service/shape/upload/wkt",
+        "http://test.com/spatial-service/tasks/create",
+        "http://test.com/spatial-service/tasks/cancel/1",
+        "http://test.com/spatial-service/workflow/save",
+        "http://test.com/spatial-service/sandbox/upload",
+        "http://test.com/spatial-service/log/search",
+        "http://test.com/spatial-service/layer/download",
+        "http://test.com/spatial-service/master/resource",
+        "http://test.com/logger/service/reasonBreakdown.json",
+    ])("Given auth cookie is set, a JWT API path is intercepted: %s", async (url) => {
+        const fetchEvent = {
+            request: new Request(url),
+            respondWith: vi.fn(),
+        };
+        global.fetch = vi.fn();
+        vi.mocked(cookieStore.get).mockResolvedValue({
+            value: "test-auth-cookie",
+        });
+
+        await mockSelf.trigger("fetch", fetchEvent);
+
+        expect(fetchEvent.respondWith).toHaveBeenCalled();
+    });
+
+    test.each([
+        // pages, assets and session-only endpoints of the services
+        "http://test.com/collectory/assets/application.js",
+        "http://test.com/collectory/public/condensed.json",
+        "http://test.com/collectory/ws/ipt/scan/dr1",
+        "http://test.com/regions/regions/regionList?type=provinces",
+        "http://test.com/alerts/notification/addMyAlert/1",
+        "http://test.com/alerts/ws/createBiocacheNewRecordsAlert",
+        "http://test.com/spatial-hub/portal/q",
+        "http://test.com/data-quality-filter-service/adminDataQuality/saveProfile",
+        "http://test.com/image-service/image/imageTooltipFragment",
+        "http://test.com/species-list/speciesList/upload",
+        "http://test.com/species-list/ws/findSpeciesByName",
+        "http://test.com/spatial-service/fields/search",
+        "http://test.com/spatial-service/shape/upload/shp/image/1/0",
+        "http://test.com/spatial-service/tasks/status/1",
+        // a jwt path only in the query string
+        "http://test.com/geoserver/wms?redirect=/biocache-service/x",
+        // another origin must never receive the token
+        "https://example.org/biocache-service/occurrences/search",
+    ])("Given auth cookie is set, a non-JWT request is left to the browser: %s", async (url) => {
+        const fetchEvent = {
+            request: new Request(url),
+            respondWith: vi.fn(),
+        };
+        global.fetch = vi.fn();
+        vi.mocked(cookieStore.get).mockResolvedValue({
+            value: "test-auth-cookie",
+        });
+
+        await mockSelf.trigger("fetch", fetchEvent);
+
+        expect(fetchEvent.respondWith).not.toHaveBeenCalled();
+        expect(global.fetch).not.toHaveBeenCalled();
     });
 
     test("Given auth cookie is set block untill access-token provided and inject user credentials in request header", async () => {
@@ -312,7 +393,7 @@ describe("Service Worker Auth Tests", () => {
     test("Given a navigation request for a jwt path, do not modify it", async () => {
         // GIVEN: navigate-mode requests cannot be constructed, so stub one
         const request = {
-            url: "http://test.com/species-list/page",
+            url: "http://test.com/biocache-service/page",
             mode: "navigate",
         } as unknown as Request;
         const fetchEvent = {
@@ -334,10 +415,62 @@ describe("Service Worker Auth Tests", () => {
         expect(fetchEvent.respondWith).not.toBeCalled();
     });
 
+    test.each(["script", "style", "font"])(
+        "Given auth cookie is set and no token is known yet, a %s request is left to the browser",
+        async (destination) => {
+            // GIVEN: a parser-blocking asset of a service page while the worker
+            // has no token (happy-dom's Request has no destination, so stub one)
+            const request = {
+                url: "http://test.com/biocache-service/assets/application.js",
+                mode: "no-cors",
+                destination,
+                headers: new Headers(),
+            } as unknown as Request;
+            const fetchEvent = {
+                request,
+                respondWith: vi.fn(),
+            };
+            global.fetch = vi.fn();
+            vi.mocked(cookieStore.get).mockResolvedValue({
+                value: "test-auth-cookie",
+            });
+            await mockSelf.trigger("install", { waitUntil: vi.fn() });
+            await mockSelf.trigger("activate");
+
+            // WHEN
+            await mockSelf.trigger("fetch", fetchEvent);
+
+            // THEN it is neither delayed waiting for a token nor answered with a 401
+            expect(fetchEvent.respondWith).not.toHaveBeenCalled();
+            expect(global.fetch).not.toHaveBeenCalled();
+        },
+    );
+
+    test("Given auth cookie is set, an image request for a jwt path is still intercepted", async () => {
+        const request = {
+            url: "http://test.com/biocache-service/mapping/wms/reflect",
+            mode: "no-cors",
+            destination: "image",
+            headers: new Headers(),
+        } as unknown as Request;
+        const fetchEvent = {
+            request,
+            respondWith: vi.fn(),
+        };
+        global.fetch = vi.fn();
+        vi.mocked(cookieStore.get).mockResolvedValue({
+            value: "test-auth-cookie",
+        });
+
+        await mockSelf.trigger("fetch", fetchEvent);
+
+        expect(fetchEvent.respondWith).toHaveBeenCalled();
+    });
+
     test("Given an only-if-cached request for a jwt path, do not modify it", async () => {
         // GIVEN: happy-dom's Request drops the cache mode, so stub one
         const request = {
-            url: "http://test.com/species-list/ws/test",
+            url: "http://test.com/species-list/ws/speciesList/dr1",
             mode: "same-origin",
             cache: "only-if-cached",
         } as unknown as Request;
@@ -360,7 +493,7 @@ describe("Service Worker Auth Tests", () => {
 
     test("Given a request that already carries an Authorization header, do not modify it", async () => {
         // GIVEN
-        const request = new Request("http://test.com/species-list/ws/test", {
+        const request = new Request("http://test.com/species-list/ws/speciesList/dr1", {
             headers: { Authorization: "Bearer app-token" },
         });
         const fetchEvent = {
@@ -387,7 +520,7 @@ describe("Service Worker Auth Tests", () => {
 
     test("Given a 401 response, request a renewed token and retry once with it", async () => {
         // GIVEN
-        const request = new Request("http://test.com/species-list/ws/test");
+        const request = new Request("http://test.com/species-list/ws/speciesList/dr1");
         const fetchEvent = {
             request,
             respondWith: vi.fn(),
@@ -576,7 +709,10 @@ function createServiceWorkerEnvironment() {
             },
         ),
         skipWaiting: vi.fn(),
-        location: { search: "?authCookieName=VBP-AUTH" },
+        location: {
+            origin: "http://test.com",
+            search: "?authCookieName=VBP-AUTH",
+        },
         clients: {
             claim: vi.fn(),
             matchAll: vi.fn().mockResolvedValue([
