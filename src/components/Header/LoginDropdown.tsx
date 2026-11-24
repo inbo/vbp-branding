@@ -16,6 +16,7 @@ import classes from "./Header.module.css";
 
 import { MenuDropDownItem } from "./MenuDropDownItem";
 import { useVBPAuth } from "../auth/VBPAuthProvider";
+import { loginArgsForClick } from "../auth/auth-client";
 
 const loginItems = (
   isAuthenticated: boolean,
@@ -50,7 +51,8 @@ export function useLoginItems() {
     items: loginItems(
       isAuthenticated,
       userId,
-      () => void (isAuthenticated ? logout() : login()),
+      (event) =>
+        void (isAuthenticated ? logout() : login(loginArgsForClick(event))),
     ),
   };
 }

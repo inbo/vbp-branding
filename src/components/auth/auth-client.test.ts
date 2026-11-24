@@ -6,6 +6,7 @@ import {
     VBPAuthSettings,
     authActionUrl,
     cleanupUrl,
+    loginArgsForClick,
 } from "./auth-client";
 import {
     clearServiceSessionCookies,
@@ -445,6 +446,29 @@ describe("login", () => {
         expect(writesOf(authCookieName).filter(isRemoval).length).toBe(2);
         expect(signinRedirect).toHaveBeenCalledWith({
             redirect_uri: "https://portal.test/y?front-auth-action=login",
+        });
+    });
+});
+
+describe("loginArgsForClick", () => {
+    test("leaves a plain click untouched", () => {
+        const args = { redirect_uri: "https://portal.test/y" };
+        expect(loginArgsForClick({ ctrlKey: false }, args)).toBe(args);
+        expect(loginArgsForClick({ ctrlKey: false })).toBeUndefined();
+    });
+
+    test("skips the identity provider redirector on CTRL-click", () => {
+        expect(
+            loginArgsForClick(
+                { ctrlKey: true },
+                {
+                    redirect_uri: "https://portal.test/y",
+                    extraQueryParams: { ui_locales: "nl" },
+                },
+            ),
+        ).toEqual({
+            redirect_uri: "https://portal.test/y",
+            extraQueryParams: { ui_locales: "nl", kc_idp_hint: "" },
         });
     });
 });

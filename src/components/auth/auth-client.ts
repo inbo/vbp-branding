@@ -319,6 +319,24 @@ export function getVBPAuthClient(settings: VBPAuthSettings): VBPAuthClient {
   return sharedClient;
 }
 
+/**
+ * Login args for a click on a login button. Holding CTRL sends an empty
+ * `kc_idp_hint`, which makes Keycloak skip its identity provider redirector
+ * (ACM/IDM) and show its own username/password form, for power users.
+ */
+export function loginArgsForClick(
+  event: Pick<MouseEvent, "ctrlKey">,
+  args?: SigninRedirectArgs,
+): SigninRedirectArgs | undefined {
+  if (!event.ctrlKey) {
+    return args;
+  }
+  return {
+    ...args,
+    extraQueryParams: { ...args?.extraQueryParams, kc_idp_hint: "" },
+  };
+}
+
 function isSilentRenewCallback(): boolean {
   return (
     window.self !== window.top &&

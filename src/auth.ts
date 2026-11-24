@@ -15,6 +15,7 @@
 export {
     VBPAuthClient,
     getVBPAuthClient,
+    loginArgsForClick,
     DEFAULT_AUTH_SCOPE,
     type VBPAuthSettings,
 } from "./components/auth/auth-client";
